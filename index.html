@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互动教学网页集</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 40px 20px; }
+    h1 { text-align: center; color: #333; margin-bottom: 10px; }
+    p.subtitle { text-align: center; color: #888; margin-bottom: 40px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+    .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+    .card h2 { font-size: 18px; color: #333; margin-bottom: 8px; }
+    .card p { font-size: 14px; color: #888; }
+    .card .tag { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 12px; padding: 4px 10px; border-radius: 20px; margin-top: 12px; }
+    .card.数学 .tag { background: #e3f2fd; color: #1565c0; }
+    .card.游戏 .tag { background: #fff3e0; color: #e65100; }
+    .card.物理 .tag { background: #e8f5e9; color: #2e7d32; }
+    .footer { text-align: center; margin-top: 40px; color: #aaa; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>🎓 互动教学网页集</h1>
+  <p class="subtitle">数学 · 游戏 · 物理 — 动手学原理</p>
+  <div class="grid">
+    <a class="card 数学" href="二上数学预习网页.html"><h2>二上数学预习网页</h2><p>二年级上册数学预习互动练习</p><span class="tag">数学</span></a>
+    <a class="card 数学" href="二下数学预习网页.html"><h2>二下数学预习网页</h2><p>二年级下册数学预习互动练习</p><span class="tag">数学</span></a>
+    <a class="card 数学" href="趣味有余数除法-竖式互动教学.html"><h2>趣味有余数除法</h2><p>竖式互动教学</p><span class="tag">数学</span></a>
+    <a class="card 数学" href="数学虫蚀算.html"><h2>数学虫蚀算</h2><p>数学虫蚀算互动学习</p><span class="tag">数学</span></a>
+    <a class="card 数学" href="极兔同笼交互学习网页.html"><h2>极兔同笼</h2><p>鸡兔同笼交互学习</p><span class="tag">数学</span></a>
+    <a class="card 数学" href="角的认识交互演示.html"><h2>角的认识</h2><p>角的认识交互演示</p><span class="tag">数学</span></a>
+    <a class="card 游戏" href="六宫格数独游戏.html"><h2>六宫格数独游戏</h2><p>六宫格数独</p><span class="tag">游戏</span></a>
+    <a class="card 游戏" href="数字华容道.html"><h2>数字华容道</h2><p>数字华容道游戏</p><span class="tag">游戏</span></a>
+    <a class="card 游戏" href="点格棋游戏.html"><h2>点格棋游戏</h2><p>点格棋互动对弈</p><span class="tag">游戏</span></a>
+    <a class="card 游戏" href="单词消消乐.html"><h2>单词消消乐</h2><p>英语单词记忆游戏</p><span class="tag">游戏</span></a>
+    <a class="card 物理" href="帆船行进原理交互网页.html"><h2>帆船行进原理</h2><p>帆船原理交互演示</p><span class="tag">物理</span></a>
+    <a class="card 游戏" href="巴什博弈.html"><h2>巴什博弈</h2><p>巴什博弈互动游戏</p><span class="tag">游戏</span></a>
+  </div>
+  <p class="footer">© 2026 chameleon202306 · GitHub源码开源</p>
+</body>
+</html>
