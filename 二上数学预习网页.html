@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二年级上册数学 - ELPS全景学习舱（青岛版）</title>
+    <style>
+        :root {
+            --primary: #00b894; 
+            --primary-light: #55efc4;
+            --secondary: #0984e3; 
+            --accent: #6c5ce7; 
+            --wisdom: #fd79a8; 
+            --theme: #f39c12; 
+            --bg-color: #f4f7f6;
+            --white: #ffffff;
+            --text-main: #2d3436;
+            --border: #dfe6e9;
+        }
+
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; }
+        
+        /* 顶部与导航 */
+        .hero { background: linear-gradient(135deg, #00b894 0%, #0984e3 100%); padding: 30px 20px; text-align: center; color: var(--white); }
+        .hero h1 { margin: 0; font-size: 26px; }
+        .hero p { opacity: 0.9; margin-top: 10px; font-size: 14px; }
+        .nav-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+        .nav-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 18px; border-radius: 25px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s; }
+        .nav-btn.active { background: var(--white); color: var(--secondary); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 通用卡片样式 */
+        .card { background: var(--white); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card-title { color: var(--secondary); border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; margin-top: 0; display: flex; align-items: center; gap: 8px; }
+        .info-card { background: #fdfbf7; border-left: 4px solid var(--primary); padding: 15px 20px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+        .info-card h4 { margin: 0 0 8px 0; color: var(--primary); }
+
+        /* ================= 思维导图样式 ================= */
+        .xmind-wrapper { overflow-x: auto; padding: 40px 20px; background: #ffffff; border-radius: 12px; border: 1px solid var(--border); }
+        .xmind-tree { display: flex; align-items: center; white-space: nowrap; }
+        .xmind-node { padding: 12px 20px; border-radius: 10px; font-size: 14px; position: relative; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 6px; }
+        .concept-tag { font-size: 11px; padding: 3px 8px; border-radius: 12px; display: inline-block; background: rgba(0,0,0,0.06); color: #636e72; font-weight: normal; }
+        .concept-tag::before { content: "🎯 概念："; }
+        .unit-concept::before { content: "📚 核心："; }
+        .xmind-root { background: var(--secondary); color: white; font-size: 18px; font-weight: bold; border: 2px solid #0652dd; align-items: center; justify-content: center; }
+        .xmind-l1 { background: #f0f7ff; color: var(--secondary); font-weight: bold; border: 1px solid #74b9ff; }
+        .xmind-l2 { background: #e8f8f5; color: var(--primary); font-weight: bold; border: 1px solid var(--primary-light); }
+        .xmind-l3 { background: white; color: var(--text-main); border: 1px solid var(--border); font-size: 13px; }
+        .tag-wisdom { border-color: var(--wisdom); }
+        .tag-wisdom .window-title { color: var(--wisdom); font-weight: bold; }
+        .tag-wisdom .concept-tag { background: #fff0f6; color: var(--wisdom); }
+        .tag-theme { border-color: var(--theme); }
+        .tag-theme .window-title { color: var(--theme); font-weight: bold; }
+        .tag-theme .concept-tag { background: #fff7e6; color: var(--theme); }
+        .window-title { font-weight: 500; }
+        .xmind-tree ul { position: relative; padding-left: 60px; list-style: none; margin: 0; display: flex; flex-direction: column; justify-content: center; }
+        .xmind-tree li { position: relative; padding: 10px 0; display: flex; align-items: center; }
+        .xmind-tree li::before { content: ""; position: absolute; left: -60px; top: 50%; width: 60px; border-top: 2px solid #ced6e0; z-index: 1; }
+        .xmind-tree li::after { content: ""; position: absolute; left: -60px; top: 0; bottom: 0; border-left: 2px solid #ced6e0; z-index: 1; }
+        .xmind-tree li:first-child::after { top: 50%; }
+        .xmind-tree li:last-child::after { bottom: 50%; }
+        .xmind-tree li:first-child:last-child::after { display: none; }
+
+        /* ================= 图画表征样式 ================= */
+        .visual-box { background: #f8f9fa; border: 2px dashed #b2bec3; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .visual-title { font-weight: bold; color: var(--secondary); margin-bottom: 15px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        
+        /* 模型1：乘法阵列 */
+        .star-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 140px; margin: 10px auto; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; justify-items: center;}
+        .star { font-size: 24px; }
+        
+        /* 模型2：角的结构 */
+        .angle-container { position: relative; width: 120px; height: 100px; margin: 20px auto; }
+        .vertex { position: absolute; bottom: 10px; left: 10px; width: 10px; height: 10px; background: #ff7675; border-radius: 50%; z-index: 2; }
+        .edge1 { position: absolute; bottom: 14px; left: 15px; width: 90px; height: 3px; background: var(--secondary); transform-origin: left center; transform: rotate(0deg); }
+        .edge2 { position: absolute; bottom: 14px; left: 15px; width: 90px; height: 3px; background: var(--secondary); transform-origin: left center; transform: rotate(-45deg); }
+        .label-vertex { position: absolute; bottom: -15px; left: 0px; font-size: 12px; font-weight: bold; color: #d63031;}
+        .label-edge1 { position: absolute; bottom: 20px; right: 10px; font-size: 12px; color: var(--secondary);}
+        .label-edge2 { position: absolute; top: 15px; right: 20px; font-size: 12px; color: var(--secondary);}
+
+        /* 模型3：方向十字 */
+        .compass { position: relative; width: 140px; height: 140px; margin: 30px auto; }
+        .compass-line-v { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; background: #b2bec3; transform: translateX(-50%); }
+        .compass-line-h { position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: #b2bec3; transform: translateY(-50%); }
+        .dir-text { position: absolute; font-weight: bold; font-size: 16px; color: var(--primary);}
+        .dir-n { top: -25px; left: 50%; transform: translateX(-50%); }
+        .dir-s { bottom: -25px; left: 50%; transform: translateX(-50%); }
+        .dir-w { left: -25px; top: 50%; transform: translateY(-50%); }
+        .dir-e { right: -25px; top: 50%; transform: translateY(-50%); }
+        .center-dot { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; background: #ff7675; border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);}
+
+        /* ================= 表格与练习样式 ================= */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+        th, td { padding: 12px; border: 1px solid var(--border); text-align: left; }
+        th { background: #f0f7ff; color: var(--secondary); }
+        .input-box { width: 50px; padding: 5px; text-align: center; border: 1px solid #aaa; border-radius: 5px; margin: 0 5px; outline: none; font-size: 15px;}
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 16px; cursor: pointer; display: block; margin: 30px auto; font-weight: bold;}
+        .btn-submit:hover { background: #00a884; }
+        .feedback { display: none; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5; }
+        .quiz-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; display: flex; align-items: center; flex-wrap: wrap;}
+        .quiz-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>📐 二年级上册数学 - ELPS全景学习舱</h1>
+        <p>基于“体验-语言-图画-符号”认知闭环 · 青岛版六三制</p>
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('t-mindmap')">1. 思维导图</button>
+            <button class="nav-btn" onclick="switchTab('t-exp')">2. 体验知识</button>
+            <button class="nav-btn" onclick="switchTab('t-lang')">3. 语言表征</button>
+            <button class="nav-btn" onclick="switchTab('t-pic')">4. 图画表征</button>
+            <button class="nav-btn" onclick="switchTab('t-sym')">5. 符号表征</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div id="t-mindmap" class="tab-content active">
+            <div class="card">
+                <h3 class="card-title">🧭 全册知识概念地图</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">上下铺结构：上方为课本情境名称，下方灰色标签为数学核心概念。向右滑动查看全貌。</p>
+                <div class="xmind-wrapper">
+                    <div class="xmind-tree">
+                        <div class="xmind-node xmind-root">二上数学<br><span style="font-size: 12px; font-weight: normal;">(青岛版六三制)</span></div>
+                        <ul>
+                            <li>
+                                <div class="xmind-node xmind-l1">🍎 数与运算 (乘除法)</div>
+                                <ul>
+                                    <li><div class="xmind-node xmind-l2"><span>一、看魔术</span><span class="concept-tag unit-concept">乘法的初步认识</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 变鸽子</span><span class="concept-tag">相同加数连加</span></div></li><li><div class="xmind-node xmind-l3"><span class="window-title">2. 变葫芦</span><span class="concept-tag">认识乘号与乘法算式</span></div></li></ul></li>
+                                    <li><div class="xmind-node xmind-l2"><span>二/四、看杂技与凯蒂学艺</span><span class="concept-tag unit-concept">表内乘法 (1-9的口诀)</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 顶碗/走钢丝</span><span class="concept-tag">编制和记忆乘法口诀</span></div></li><li><div class="xmind-node xmind-l3 tag-wisdom"><span class="window-title">✨ 智慧广场</span><span class="concept-tag">简单的排列组合</span></div></li></ul></li>
+                                    <li><div class="xmind-node xmind-l2"><span>五、森林里的故事</span><span class="concept-tag unit-concept">除法的初步认识</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 动物聚餐</span><span class="concept-tag">平均分的意义</span></div></li><li><div class="xmind-node xmind-l3"><span class="window-title">2. 救小动物</span><span class="concept-tag">认识除号与包含除</span></div></li></ul></li>
+                                    <li><div class="xmind-node xmind-l2"><span>七、制作标本</span><span class="concept-tag unit-concept">表内除法</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 采树叶</span><span class="concept-tag">用乘法口诀求商</span></div></li><li><div class="xmind-node xmind-l3 tag-wisdom"><span class="window-title">✨ 智慧广场</span><span class="concept-tag">植树问题</span></div></li></ul></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="xmind-node xmind-l1">📐 图形与空间</div>
+                                <ul>
+                                    <li><div class="xmind-node xmind-l2"><span>三、小制作</span><span class="concept-tag unit-concept">角的初步认识</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 做五角星</span><span class="concept-tag">认识角的顶点和边</span></div></li><li><div class="xmind-node xmind-l3"><span class="window-title">2. 找直角</span><span class="concept-tag">认识直角、锐角、钝角</span></div></li></ul></li>
+                                    <li><div class="xmind-node xmind-l2"><span>六、小桥流水人家</span><span class="concept-tag unit-concept">方向与位置</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 看日出</span><span class="concept-tag">认识东、南、西、北</span></div></li></ul></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="xmind-node xmind-l1">📊 统计与实践</div>
+                                <ul>
+                                    <li><div class="xmind-node xmind-l2"><span>八、亲近大海</span><span class="concept-tag unit-concept">统计与可能性</span></div><ul><li><div class="xmind-node xmind-l3"><span class="window-title">1. 捡贝壳</span><span class="concept-tag">画统计图与分类整理</span></div></li></ul></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="t-exp" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">🌍 真实世界的数学体验</h3>
+                <p style="color:#666; font-size:14px;">为什么要发明这些数学工具？在生活场景中寻找答案。</p>
+                
+                <div class="info-card">
+                    <h4>🎩 场景 1：魔术师变鸽子 (为什么要学乘法？)</h4>
+                    <p>魔术师变出了 9 顶帽子，每顶帽子里飞出 5 只鸽子。你想算算一共有多少只鸽子。如果用加法，你得写：5+5+5+5+5+5+5+5+5，手都写酸了！<br>
+                    <b>💡 顿悟时刻：</b>因为“把许多个相同的数字加起来”太麻烦了，所以数学家发明了“乘法”！直接写 9×5，一秒搞定。</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>🍰 场景 2：森林分蛋糕 (为什么要学除法？)</h4>
+                    <p>熊妈妈烤了 12 块小蛋糕，要分给 4 只小熊。如果第一只给 5 块，第二只给 3 块……小熊们一定会吵架的！<br>
+                    <b>💡 顿悟时刻：</b>为了不让大家吵架，必须要“每份分得一样多”，这就叫“平均分”。而除法，就是专门用来解决“平均分”问题的神器。</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>🧭 场景 3：森林迷路找家 (为什么要学方向？)</h4>
+                    <p>你在大森林里迷路了，手机也没电了。但你记得家在学校的正南方。这时你抬头看到了早上刚升起的太阳。<br>
+                    <b>💡 顿悟时刻：</b>太阳永远从东方升起！只要你面向太阳，你的前面就是东，后面就是西。依靠这个规律，不需要导航你也能找到回家的路。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="t-lang" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">🗣️ 数学口诀大宝典</h3>
+                <p style="color:#666; font-size:14px;">记住这些大白话口诀，做题永远不会错。</p>
+                <table>
+                    <tr>
+                        <th width="25%">知识板块</th>
+                        <th>核心大白话 / 记忆口诀</th>
+                    </tr>
+                    <tr>
+                        <td><b>乘法的意义</b></td>
+                        <td>只有加数都一样，才能请出乘法帮忙。<br><span style="color:var(--secondary); font-weight:bold;">口诀：求几个相同加数的和，用乘法最简便。</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>除法的意义</b></td>
+                        <td>大家分得都一样多，没有人吃亏。<br><span style="color:var(--secondary); font-weight:bold;">口诀：平均分，就是每份分得一样多。</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>认识角</b></td>
+                        <td>角不是圆滑的，它有一个尖尖的刺，和两条笔直的线。<br><span style="color:var(--secondary); font-weight:bold;">口诀：一个角，有一个顶点，和两条直直的边。</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>辨认方向</b></td>
+                        <td>大自然就是最好的指南针。<br><span style="color:var(--secondary); font-weight:bold;">口诀：早上起来，面向太阳。前面是东，后面是西，左面是北，右面是南。</span></td>
+                    </tr>
+                    <tr>
+                        <td><b>角的分类</b></td>
+                        <td>拿三角尺的直角去比一比。<br><span style="color:var(--secondary); font-weight:bold;">口诀：比直角小的是锐角（尖尖的），比直角大的是钝角（钝钝的）。</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="t-pic" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">🎨 画出数学的道理</h3>
+                <p style="color:#666; font-size:14px;">在脑海里建立清晰的视觉模型，概念就能一眼看透。</p>
+
+                <div class="visual-box">
+                    <span class="visual-title">1. 乘法阵列模型：3 × 4 = 12</span>
+                    <p style="font-size: 13px;">看这组星星，横着看是 3排，每排 4个；竖着看是 4列，每列 3个。</p>
+                    <div class="star-grid">
+                        <div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div>
+                        <div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div>
+                        <div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div><div class="star">⭐</div>
+                    </div>
+                    <p style="margin-top: 5px; color: #777; font-size:12px;">不管是 3个4相加，还是 4个3相加，结果都是 12。</p>
+                </div>
+
+                <div class="visual-box">
+                    <span class="visual-title">2. 角的结构模型</span>
+                    <p style="font-size: 13px;">记住口诀：一个角，有一个顶点和两条边。</p>
+                    <div class="angle-container">
+                        <div class="vertex"></div>
+                        <div class="edge1"></div>
+                        <div class="edge2"></div>
+                        <div class="label-vertex">顶点</div>
+                        <div class="label-edge1">边</div>
+                        <div class="label-edge2">边</div>
+                    </div>
+                </div>
+
+                <div class="visual-box">
+                    <span class="visual-title">3. 平面方向十字模型</span>
+                    <p style="font-size: 13px;">在地图上或者纸上认方向，永远遵守这个十字法则：</p>
+                    <div class="compass">
+                        <div class="compass-line-v"></div>
+                        <div class="compass-line-h"></div>
+                        <div class="center-dot"></div>
+                        <div class="dir-text dir-n">北 (上)</div>
+                        <div class="dir-text dir-s">南 (下)</div>
+                        <div class="dir-text dir-w">西<br>(左)</div>
+                        <div class="dir-text dir-e">东<br>(右)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="t-sym" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">🎯 综合符号运算大挑战</h3>
+                <p style="color:#666; font-size:14px;">将图画和口诀，转化为精准的数学符号！填一填试试吧。</p>
+                <div style="background: #fafafa; padding: 20px; border-radius: 8px;">
+                    
+                    <div class="quiz-item">
+                        <b>1. 【乘法翻译】</b> 将连加算式 6 + 6 + 6 + 6 翻译成乘法算式： <br>
+                        <input type="number" class="input-box" id="q1_1"> × <input type="number" class="input-box" id="q1_2">
+                    </div>
+
+                    <div class="quiz-item">
+                        <b>2. 【除法表征】</b> 把 24 个苹果，平均分给 4 个小朋友，每个小朋友分几个？写出算式：<br>
+                        <input type="number" class="input-box" id="q2_1"> ÷ <input type="number" class="input-box" id="q2_2"> = <input type="number" class="input-box" id="q2_3">
+                    </div>
+
+                    <div class="quiz-item">
+                        <b>3. 【认识角】</b> 判断题：一个圆形的盘子，上面有（ <input type="number" class="input-box" id="q3"> ）个角。
+                    </div>
+
+                    <div class="quiz-item">
+                        <b>4. 【方向推理】</b> 傍晚放学，你面向太阳下落的方向走，你的后面是（ <input type="text" class="input-box" id="q4" style="width:60px;" placeholder="填汉字"> ）面。
+                    </div>
+
+                    <div class="quiz-item">
+                        <b>5. 【综合应用】</b> 商店里有 3 盒彩笔，每盒有 8 支。小明买走了 5 支，还剩多少支彩笔？<br>
+                        答：还剩 <input type="number" class="input-box" id="q5"> 支。
+                    </div>
+
+                    <button class="btn-submit" onclick="checkAnswers()">提交试卷 🚀</button>
+                    <div id="final-feed" class="feedback"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function checkAnswers() {
+            let q1_1 = document.getElementById('q1_1').value;
+            let q1_2 = document.getElementById('q1_2').value;
+            let q2_1 = document.getElementById('q2_1').value;
+            let q2_2 = document.getElementById('q2_2').value;
+            let q2_3 = document.getElementById('q2_3').value;
+            let q3 = document.getElementById('q3').value;
+            let q4 = document.getElementById('q4').value.trim();
+            let q5 = document.getElementById('q5').value;
+            let feed = document.getElementById('final-feed');
+            
+            let allCorrect = true;
+            let errorMsg = "<b>解析提示：</b><br>";
+
+            // Q1: 可以是 6*4 或 4*6
+            if(!((q1_1 == '6' && q1_2 == '4') || (q1_1 == '4' && q1_2 == '6'))) { 
+                allCorrect = false; errorMsg += "❌ 第1题：有4个6相加，所以写成乘法是 6×4 或 4×6。<br>"; 
+            }
+            if(q2_1 !== '24' || q2_2 !== '4' || q2_3 !== '6') { 
+                allCorrect = false; errorMsg += "❌ 第2题：把24平均分成4份，列式为 24÷4。想口诀：四(六)二十四，所以商是6。<br>"; 
+            }
+            if(q3 !== '0') { 
+                allCorrect = false; errorMsg += "❌ 第3题：回忆“语言表征”，角必须有尖尖的“顶点”和直直的“边”，圆形盘子圆滑没有边和顶点，所以是0个角。<br>"; 
+            }
+            if(q4 !== '东') { 
+                allCorrect = false; errorMsg += "❌ 第4题：傍晚太阳从西方落下。你面向西，那你的背后面就是“东”面。<br>"; 
+            }
+            if(q5 !== '19') { 
+                allCorrect = false; errorMsg += "❌ 第5题：先算一共有多少支：3×8=24(支)；再减去买走的：24-5=19(支)。<br>"; 
+            }
+
+            if(allCorrect) {
+                feed.style.display = 'block'; feed.style.background = '#e8f8f5'; feed.style.color = '#00b894';
+                feed.innerHTML = '🎉 <b>太棒了，全部正确！</b> 你已经完美掌握了二年级上册乘除法和空间图形的核心魔法，为你点赞！';
+            } else {
+                feed.style.display = 'block'; feed.style.background = '#fff0f6'; feed.style.color = '#d63031';
+                feed.innerHTML = errorMsg + '<br>👉 别灰心，在上面的图画和口诀里找找线索，再试一次吧！';
+            }
+        }
+    </script>
+</body>
+</html>

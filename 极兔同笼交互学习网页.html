@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鸡兔同笼 - 趣味数学游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .game-container {
+            width: 90%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .problem-info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .cage {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 250px;
+            margin-bottom: 20px;
+        }
+
+        .animal {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .animal:hover {
+            transform: scale(1.05);
+        }
+
+        .chicken {
+            background-color: #ffeaa7;
+        }
+
+        .rabbit {
+            background-color: #a8e6cf;
+        }
+
+        .animal-icon {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        .difficulty-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.reset {
+            background-color: #e74c3c;
+        }
+
+        button.reset:hover {
+            background-color: #c0392b;
+        }
+
+        button.random {
+            background-color: #9b59b6;
+        }
+
+        button.random:hover {
+            background-color: #8e44ad;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+            min-height: 24px;
+        }
+
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            animation: pop 0.5s;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .success-title {
+            color: #27ae60;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .confetti {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .animal {
+                width: 70px;
+                height: 70px;
+            }
+            .game-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🐔🐰 鸡兔同笼大挑战 🐰🐔</h1>
+        
+        <div class="problem-info">
+            <p>笼子里一共有 <strong id="total-heads">8</strong> 个头，<strong id="total-legs">26</strong> 条腿</p>
+            <p>请你来猜猜看，鸡和兔子各有几只？</p>
+        </div>
+
+        <div class="cage" id="cage">
+            <!-- 动物元素会通过JS动态生成 -->
+        </div>
+
+        <div class="difficulty-selector">
+            <h3>选择难度：</h3>
+            <button class="difficulty-btn active" data-level="easy">🐣 简单 (1-7头)</button>
+            <button class="difficulty-btn" data-level="medium">🐥 中等 (8-14头)</button>
+            <button class="difficulty-btn" data-level="hard">🐔 困难 (15-20头)</button>
+        </div>
+
+        <div class="controls">
+            <button id="add-chicken">➕ 添加小鸡</button>
+            <button id="add-rabbit">➕ 添加兔子</button>
+            <button id="remove-last">➖ 移除最后一个</button>
+            <button id="check-answer" class="check">✅ 检查答案</button>
+            <button id="random-problem" class="random">🎲 随机题目</button>
+            <button id="reset-game" class="reset">🔄 重新开始</button>
+        </div>
+
+        <div class="status" id="status">
+            当前：0只鸡，0只兔 | 总腿数：0
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="success-modal" id="success-modal">
+        <div class="modal-content">
+            <div class="confetti">🎉🎊🥳</div>
+            <h2 class="success-title">太棒了！你答对了！</h2>
+            <p>你成功解决了鸡兔同笼问题！</p>
+            <br>
+            <button id="play-again">再玩一次</button>
+            <button id="next-problem" style="margin-left: 10px;">下一题</button>
+        </div>
+    </div>
+
+    <script>
+        // 游戏配置
+        const gameConfig = {
+            chickenLegs: 2,   // 鸡的腿数
+            rabbitLegs: 4,    // 兔子的腿数
+            difficultyLevels: {
+                easy: { min: 1, max: 7 },
+                medium: { min: 8, max: 14 },
+                hard: { min: 15, max: 20 }
+            },
+            currentDifficulty: 'easy'
+        };
+
+        // 游戏状态
+        let gameState = {
+            totalHeads: 8,    // 总头数
+            totalLegs: 26,    // 总腿数
+            chickens: 0,
+            rabbits: 0,
+            animals: []
+        };
+
+        // DOM元素
+        const cage = document.getElementById('cage');
+        const statusText = document.getElementById('status');
+        const successModal = document.getElementById('success-modal');
+        const addChickenBtn = document.getElementById('add-chicken');
+        const addRabbitBtn = document.getElementById('add-rabbit');
+        const removeLastBtn = document.getElementById('remove-last');
+        const checkAnswerBtn = document.getElementById('check-answer');
+        const randomProblemBtn = document.getElementById('random-problem');
+        const resetGameBtn = document.getElementById('reset-game');
+        const playAgainBtn = document.getElementById('play-again');
+        const nextProblemBtn = document.getElementById('next-problem');
+        const totalHeadsEl = document.getElementById('total-heads');
+        const totalLegsEl = document.getElementById('total-legs');
+
+        // 生成随机题目（确保有合理整数解）
+        function generateRandomProblem() {
+            // 获取当前难度级别的头数范围
+            const levelConfig = gameConfig.difficultyLevels[gameConfig.currentDifficulty];
+            const minHeads = levelConfig.min;
+            const maxHeads = levelConfig.max;
+            
+            // 随机生成总头数
+            const totalHeads = Math.floor(Math.random() * (maxHeads - minHeads + 1)) + minHeads;
+            
+            // 随机生成兔子数量（至少1只，最多totalHeads-1只，确保鸡也至少有1只）
+            const rabbits = Math.floor(Math.random() * (totalHeads - 2)) + 1;
+            const chickens = totalHeads - rabbits;
+            
+            // 计算总腿数
+            const totalLegs = chickens * gameConfig.chickenLegs + rabbits * gameConfig.rabbitLegs;
+            
+            // 更新游戏状态
+            gameState.totalHeads = totalHeads;
+            gameState.totalLegs = totalLegs;
+            
+            // 更新界面显示
+            totalHeadsEl.textContent = totalHeads;
+            totalLegsEl.textContent = totalLegs;
+            
+            // 重置当前答题状态
+            resetGameState();
+            
+            // 提示用户
+            updateStatus('🎲 已生成新的随机题目！');
+        }
+
+        // 重置答题状态（保留当前题目）
+        function resetGameState() {
+            gameState.chickens = 0;
+            gameState.rabbits = 0;
+            gameState.animals = [];
+            
+            // 清空笼子
+            cage.innerHTML = '';
+            
+            // 更新状态
+            updateStatus();
+        }
+
+        // 创建动物元素
+        function createAnimalElement(type) {
+            const animal = document.createElement('div');
+            animal.className = `animal ${type}`;
+            
+            const icon = document.createElement('div');
+            icon.className = 'animal-icon';
+            icon.textContent = type === 'chicken' ? '🐔' : '🐰';
+            
+            const count = document.createElement('div');
+            count.className = 'animal-count';
+            count.textContent = type === 'chicken' ? `鸡${gameState.chickens}` : `兔${gameState.rabbits}`;
+            
+            animal.appendChild(icon);
+            animal.appendChild(count);
+            
+            return animal;
+        }
+
+        // 添加动物
+        function addAnimal(type) {
+            // 检查是否超过总头数
+            if (gameState.animals.length >= gameState.totalHeads) {
+                updateStatus('⚠️ 不能再添加了，头数已经满了！');
+                return;
+            }
+
+            // 更新游戏状态
+            if (type === 'chicken') {
+                gameState.chickens++;
+            } else {
+                gameState.rabbits++;
+            }
+            
+            // 创建并添加动物元素
+            const animalEl = createAnimalElement(type);
+            cage.appendChild(animalEl);
+            gameState.animals.push(type);
+            
+            // 更新状态
+            updateStatus();
+        }
+
+        // 移除最后一个动物
+        function removeLastAnimal() {
+            if (gameState.animals.length === 0) {
+                updateStatus('⚠️ 笼子里已经没有动物了！');
+                return;
+            }
+
+            // 移除最后一个元素
+            const lastType = gameState.animals.pop();
+            if (lastType === 'chicken') {
+                gameState.chickens--;
+            } else {
+                gameState.rabbits--;
+            }
+            
+            // 移除DOM元素
+            cage.removeChild(cage.lastChild);
+            
+            // 更新状态
+            updateStatus('✅ 已移除最后一个动物');
+        }
+
+        // 检查答案
+        function checkAnswer() {
+            const currentLegs = gameState.chickens * gameConfig.chickenLegs + 
+                               gameState.rabbits * gameConfig.rabbitLegs;
+            
+            // 检查是否符合条件
+            if (gameState.chickens + gameState.rabbits !== gameState.totalHeads) {
+                updateStatus(`⚠️ 头数不对！需要${gameState.totalHeads}个头，当前${gameState.chickens + gameState.rabbits}个`);
+                return;
+            }
+            
+            if (currentLegs !== gameState.totalLegs) {
+                updateStatus(`⚠️ 腿数不对！需要${gameState.totalLegs}条腿，当前${currentLegs}条`);
+                return;
+            }
+            
+            // 答对了
+            updateStatus('🎉 恭喜你！答对了！');
+            successModal.style.display = 'flex';
+        }
+
+        // 更新状态文本
+        function updateStatus(customMsg = '') {
+            const totalLegs = gameState.chickens * gameConfig.chickenLegs + 
+                             gameState.rabbits * gameConfig.rabbitLegs;
+            
+            if (customMsg) {
+                statusText.textContent = customMsg;
+            } else {
+                statusText.textContent = `当前：${gameState.chickens}只鸡，${gameState.rabbits}只兔 | 总腿数：${totalLegs}`;
+            }
+        }
+
+        // 处理难度选择
+        function handleDifficultySelection() {
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 更新按钮状态
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // 更新游戏难度
+                    gameConfig.currentDifficulty = btn.dataset.level;
+                    
+                    // 生成对应难度的题目
+                    generateRandomProblem();
+                    
+                    // 提示用户
+                    const levelText = btn.textContent;
+                    updateStatus(`🎮 已切换到：${levelText}`);
+                });
+            });
+        }
+
+        // 事件监听
+        addChickenBtn.addEventListener('click', () => addAnimal('chicken'));
+        addRabbitBtn.addEventListener('click', () => addAnimal('rabbit'));
+        removeLastBtn.addEventListener('click', removeLastAnimal);
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        randomProblemBtn.addEventListener('click', generateRandomProblem);
+        resetGameBtn.addEventListener('click', initGame);
+        playAgainBtn.addEventListener('click', initGame);
+        nextProblemBtn.addEventListener('click', () => {
+            generateRandomProblem();
+            successModal.style.display = 'none';
+        });
+
+        // 初始化游戏
+        function initGame() {
+            // 设置题目参数
+            totalHeadsEl.textContent = gameState.totalHeads;
+            totalLegsEl.textContent = gameState.totalLegs;
+            
+            // 重置游戏状态
+            resetGameState();
+            
+            // 隐藏成功弹窗
+            successModal.style.display = 'none';
+        }
+
+        // 初始化游戏和难度选择
+        window.addEventListener('load', () => {
+            initGame();
+            handleDifficultySelection();
+        });
+    </script>
+</body>
+</html>

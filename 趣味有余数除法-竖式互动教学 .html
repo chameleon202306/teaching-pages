@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味有余数除法</title>
+    <style>
+:root {
+    --primary-color: #FF9F1C;
+    --secondary-color: #2EC4B6;
+    --accent-color: #E71D36;
+    --bg-color: #FDFFFC;
+    --text-color: #011627;
+    --highlight-color: #FFD700;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    background-color: #f0f4f8;
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: var(--bg-color);
+    width: 100%;
+    max-width: 900px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: var(--accent-color);
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.mode-switch {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+button {
+    font-family: inherit;
+    font-size: 1.2em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    color: #555;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+button.active {
+    background-color: var(--secondary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+#btn-new-demo, #btn-new-practice {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#btn-next-step {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+#btn-check-answer {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.secondary-btn {
+    background-color: #4A90E2;
+    color: white;
+}
+
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    background-color: #e3f2fd;
+    padding: 10px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #0277bd;
+    border: 2px solid #b3e5fc;
+}
+
+.stats-bar b {
+    color: var(--accent-color);
+    font-size: 1.3em;
+}
+
+.visual-area {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+    min-height: 300px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #fff9e6;
+    border-radius: 15px;
+    border: 2px dashed #ccc;
+}
+
+.objects-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.object-row {
+    display: flex;
+    gap: 10px;
+    padding: 5px;
+    transition: all 0.3s ease;
+}
+
+.object-row.remainder-row {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #fff3cd;
+    border-radius: 15px;
+    border: 2px dashed #ffc107;
+    position: relative;
+}
+
+.object-row.remainder-row::before {
+    content: "余数";
+    position: absolute;
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #856404;
+}
+
+.object-item {
+    width: 40px;
+    height: 40px;
+    background-color: #ffcc00; /* Apple color roughly */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.5s ease;
+}
+
+.object-item.grouped {
+    border: 3px solid var(--secondary-color);
+    background-color: #ccffcc;
+}
+
+.vertical-calc-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vertical-calc {
+    display: grid;
+    grid-template-columns: repeat(4, 40px);
+    grid-template-rows: repeat(5, 50px);
+    font-size: 40px;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    gap: 2px;
+}
+
+.vertical-calc span, .vertical-calc input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell-quotient { grid-row: 1; grid-column: 4; border-bottom: 2px solid transparent; }
+.cell-divisor { grid-row: 2; grid-column: 1; }
+.cell-symbol { 
+    grid-row: 2; 
+    grid-column: 2; 
+    position: relative;
+}
+.cell-symbol::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 10%;
+    bottom: 10%;
+    width: 20px;
+    border-right: 3px solid black;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+}
+
+.cell-dividend-tens { grid-row: 2; grid-column: 3; border-top: 3px solid black; }
+.cell-dividend-units { grid-row: 2; grid-column: 4; border-top: 3px solid black; }
+
+.cell-product-tens { grid-row: 3; grid-column: 3; }
+.cell-product-units { grid-row: 3; grid-column: 4; }
+
+.cell-line { 
+    grid-row: 4; 
+    grid-column: 3 / span 2; 
+    border-top: 3px solid black;
+    height: 1px;
+    align-self: center;
+}
+
+.cell-remainder { grid-row: 5; grid-column: 4; }
+
+/* Input Styles */
+.vertical-calc input {
+    width: 100%;
+    height: 80%;
+    font-size: 30px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.vertical-calc input:focus {
+    border-color: var(--secondary-color);
+    outline: none;
+}
+
+.vertical-calc input.correct {
+    background-color: #d4edda;
+    border-color: #28a745;
+}
+
+.vertical-calc input.incorrect {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+}
+
+.instruction-box, .feedback-box {
+    text-align: center;
+    background-color: #e3f2fd;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.5em;
+    min-height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 10px solid var(--primary-color);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-appear {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.highlight {
+    color: var(--accent-color);
+    transform: scale(1.2);
+    transition: all 0.3s;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.report-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(var(--secondary-color) 0% 100%, #eee 0%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.score-circle span {
+    font-size: 2em;
+    line-height: 1;
+}
+
+.score-circle .label {
+    font-size: 0.8em;
+}
+
+.stats-detail p {
+    font-size: 1.2em;
+    margin: 5px 0;
+}
+
+.analysis-section {
+    margin-bottom: 20px;
+    background-color: #fff3cd;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 5px solid #ffc107;
+}
+
+.analysis-section h3 {
+    color: #856404;
+    margin-top: 0;
+}
+
+.analysis-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.analysis-section li {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.analysis-section li:before {
+    content: '👉';
+    position: absolute;
+    left: 0;
+}
+
+.wrong-questions-list {
+    margin-bottom: 20px;
+}
+
+.wrong-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wrong-item .question {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.wrong-item .detail {
+    font-size: 0.9em;
+    color: #dc3545;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.danger-btn {
+    background-color: #dc3545;
+    color: white;
+    font-size: 1em;
+    padding: 10px 15px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #888;
+    font-size: 0.9em;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍎 趣味有余数除法 🍌</h1>
+            <div class="mode-switch">
+                <button id="btn-demo-mode" class="active">学习模式</button>
+                <button id="btn-practice-mode">练习模式</button>
+            </div>
+        </header>
+
+        <!-- 学习模式 -->
+        <main id="demo-section">
+            <div class="controls">
+                <button id="btn-new-demo">出个新题</button>
+                <button id="btn-next-step" disabled>下一步</button>
+                <button id="btn-reset-demo" disabled>重新开始</button>
+            </div>
+            
+            <div class="visual-area">
+                <div class="objects-container" id="demo-objects">
+                    <!-- 动态生成的物品将放在这里 -->
+                </div>
+                <div class="vertical-calc-container">
+                    <div id="demo-calc" class="vertical-calc">
+                        <!-- 竖式结构 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="instruction-box">
+                <p id="instruction-text">点击"出个新题"开始学习吧！</p>
+            </div>
+        </main>
+
+        <!-- 练习模式 -->
+        <main id="practice-section" class="hidden">
+            <div class="stats-bar">
+                <span>已练习: <b id="stat-total">0</b> 题</span>
+                <span>做对: <b id="stat-correct">0</b> 题</span>
+            </div>
+
+            <div class="controls">
+                <button id="btn-new-practice">来个挑战</button>
+                <button id="btn-check-answer">检查答案</button>
+                <button id="btn-view-report" class="secondary-btn">查看报告</button>
+            </div>
+
+            <div class="visual-area">
+                <div class="vertical-calc-container">
+                    <div id="practice-calc" class="vertical-calc input-mode">
+                        <!-- 动态生成的输入框竖式 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-box">
+                <p id="feedback-text">准备好了吗？点击"来个挑战"！</p>
+            </div>
+        </main>
+
+        <!-- 报告模态框 -->
+        <div id="report-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>📊 学习诊断报告</h2>
+                <div class="report-summary">
+                    <div class="score-circle">
+                        <span id="report-score">100</span>
+                        <span class="label">分</span>
+                    </div>
+                    <div class="stats-detail">
+                        <p>共练习：<span id="report-total">0</span> 题</p>
+                        <p>做对：<span id="report-correct">0</span> 题</p>
+                        <p>做错：<span id="report-wrong">0</span> 题</p>
+                    </div>
+                </div>
+                
+                <div class="analysis-section">
+                    <h3>💡 错题分析与建议</h3>
+                    <ul id="analysis-list">
+                        <!-- 动态生成建议 -->
+                    </ul>
+                </div>
+
+                <div class="wrong-questions-list">
+                    <h3>❌ 错题本 (最近5题)</h3>
+                    <div id="wrong-questions-container">
+                        <!-- 错题回顾 -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btn-close-report">继续练习</button>
+                    <button id="btn-restart-session" class="danger-btn">清空记录重新开始</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>开发者：世华托管王老师</p>
+        </footer>
+    </div>
+
+    <script>
+class DivisionGame {
+    constructor() {
+        this.state = {
+            mode: 'demo',
+            step: 0,
+            problem: null,
+            stats: {
+                total: 0,
+                correct: 0,
+                mistakes: []
+            }
+        };
+
+        this.elements = {
+            modeSwitch: {
+                demo: document.getElementById('btn-demo-mode'),
+                practice: document.getElementById('btn-practice-mode')
+            },
+            sections: {
+                demo: document.getElementById('demo-section'),
+                practice: document.getElementById('practice-section')
+            },
+            demo: {
+                btnNew: document.getElementById('btn-new-demo'),
+                btnNext: document.getElementById('btn-next-step'),
+                btnReset: document.getElementById('btn-reset-demo'),
+                calcContainer: document.getElementById('demo-calc'),
+                objectsContainer: document.getElementById('demo-objects'),
+                instruction: document.getElementById('instruction-text')
+            },
+            practice: {
+                btnNew: document.getElementById('btn-new-practice'),
+                btnCheck: document.getElementById('btn-check-answer'),
+                btnReport: document.getElementById('btn-view-report'),
+                calcContainer: document.getElementById('practice-calc'),
+                feedback: document.getElementById('feedback-text'),
+                statTotal: document.getElementById('stat-total'),
+                statCorrect: document.getElementById('stat-correct')
+            },
+            report: {
+                modal: document.getElementById('report-modal'),
+                btnClose: document.getElementById('btn-close-report'),
+                btnRestart: document.getElementById('btn-restart-session'),
+                btnCloseIcon: document.querySelector('.close-modal'),
+                score: document.getElementById('report-score'),
+                total: document.getElementById('report-total'),
+                correct: document.getElementById('report-correct'),
+                wrong: document.getElementById('report-wrong'),
+                analysisList: document.getElementById('analysis-list'),
+                wrongList: document.getElementById('wrong-questions-container')
+            }
+        };
+
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.elements.modeSwitch.demo.addEventListener('click', () => this.switchMode('demo'));
+        this.elements.modeSwitch.practice.addEventListener('click', () => this.switchMode('practice'));
+
+        this.elements.demo.btnNew.addEventListener('click', () => this.initDemo());
+        this.elements.demo.btnNext.addEventListener('click', () => this.nextDemoStep());
+        this.elements.demo.btnReset.addEventListener('click', () => this.resetDemoStep());
+
+        this.elements.practice.btnNew.addEventListener('click', () => this.initPractice());
+        this.elements.practice.btnCheck.addEventListener('click', () => this.checkAnswer());
+        this.elements.practice.btnReport.addEventListener('click', () => this.showReport());
+
+        this.elements.report.btnClose.addEventListener('click', () => this.hideReport());
+        this.elements.report.btnCloseIcon.addEventListener('click', () => this.hideReport());
+        this.elements.report.btnRestart.addEventListener('click', () => this.restartSession());
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === this.elements.report.modal) {
+                this.hideReport();
+            }
+        });
+    }
+
+    switchMode(mode) {
+        this.state.mode = mode;
+        
+        this.elements.modeSwitch.demo.classList.toggle('active', mode === 'demo');
+        this.elements.modeSwitch.practice.classList.toggle('active', mode === 'practice');
+
+        if (mode === 'demo') {
+            this.elements.sections.demo.classList.remove('hidden');
+            this.elements.sections.practice.classList.add('hidden');
+            if (!this.state.problem) this.initDemo();
+        } else {
+            this.elements.sections.demo.classList.add('hidden');
+            this.elements.sections.practice.classList.remove('hidden');
+            this.initPractice();
+        }
+    }
+
+    generateProblem() {
+        const divisor = Math.floor(Math.random() * 8) + 2;
+        const maxRemainder = divisor - 1;
+        const remainder = Math.floor(Math.random() * maxRemainder) + 1;
+        const quotient = Math.floor(Math.random() * 9) + 1;
+        
+        const dividend = divisor * quotient + remainder;
+
+        return {
+            divisor,
+            dividend,
+            quotient,
+            remainder,
+            product: divisor * quotient
+        };
+    }
+
+    // ================= DEMO MODE =================
+
+    initDemo() {
+        this.state.problem = this.generateProblem();
+        this.state.step = 0;
+        
+        this.renderDemoObjects();
+        this.renderDemoCalcInitial();
+        
+        this.elements.demo.btnNext.disabled = false;
+        this.elements.demo.btnReset.disabled = true;
+        this.elements.demo.instruction.textContent = '题目：' + this.state.problem.dividend + ' ÷ ' + this.state.problem.divisor + ' = ?';
+        this.elements.demo.instruction.style.color = 'black';
+    }
+
+    renderDemoObjects() {
+        const container = this.elements.demo.objectsContainer;
+        container.innerHTML = '';
+        const p = this.state.problem;
+        
+        let globalIndex = 0;
+
+        for (let r = 0; r < p.quotient; r++) {
+            const row = document.createElement('div');
+            row.className = 'object-row';
+            
+            for (let c = 0; c < p.divisor; c++) {
+                this.createApple(row, globalIndex);
+                globalIndex++;
+            }
+            container.appendChild(row);
+        }
+        
+        if (p.remainder > 0) {
+            const row = document.createElement('div');
+            row.className = 'object-row remainder-row';
+            
+            for (let i = 0; i < p.remainder; i++) {
+                this.createApple(row, globalIndex);
+                globalIndex++;
+            }
+            container.appendChild(row);
+        }
+    }
+
+    createApple(container, index) {
+        const item = document.createElement('div');
+        item.className = 'object-item animate-appear';
+        item.textContent = '🍎';
+        item.style.animationDelay = (index * 0.05) + 's';
+        container.appendChild(item);
+    }
+
+    renderDemoCalcInitial() {
+        const p = this.state.problem;
+        const container = this.elements.demo.calcContainer;
+        container.innerHTML = '';
+
+        this.createCell(container, p.divisor, 'cell-divisor');
+        this.createCell(container, '', 'cell-symbol');
+        
+        const divStr = p.dividend.toString();
+        if (divStr.length === 2) {
+            this.createCell(container, divStr[0], 'cell-dividend-tens');
+            this.createCell(container, divStr[1], 'cell-dividend-units');
+        } else {
+            this.createCell(container, divStr[0], 'cell-dividend-units');
+        }
+    }
+
+    createCell(container, text, className) {
+        const div = document.createElement('div');
+        div.className = className;
+        div.textContent = text;
+        container.appendChild(div);
+        return div;
+    }
+
+    nextDemoStep() {
+        const p = this.state.problem;
+        const container = this.elements.demo.calcContainer;
+        this.state.step++;
+
+        const step = this.state.step;
+
+        if (step === 1) {
+            this.elements.demo.instruction.innerHTML = '第一步（商）：<br>' + p.divisor + ' 乘几最接近 ' + p.dividend + '？是 <strong>' + p.quotient + '</strong>。';
+            
+            this.createCell(container, p.quotient, 'cell-quotient animate-appear highlight');
+            
+            const items = document.querySelectorAll('.object-item');
+            items.forEach((item, index) => {
+                if (index < p.product) {
+                    item.classList.add('grouped');
+                }
+            });
+
+        } else if (step === 2) {
+            this.elements.demo.instruction.innerHTML = '第二步（乘）：<br>' + p.quotient + ' 乘 ' + p.divisor + ' 等于 <strong>' + p.product + '</strong>。';
+            
+            const prodStr = p.product.toString();
+            if (prodStr.length === 2) {
+                this.createCell(container, prodStr[0], 'cell-product-tens animate-appear');
+                this.createCell(container, prodStr[1], 'cell-product-units animate-appear');
+            } else {
+                this.createCell(container, prodStr[0], 'cell-product-units animate-appear');
+            }
+
+        } else if (step === 3) {
+            this.elements.demo.instruction.innerHTML = '第三步（减）：<br>' + p.dividend + ' 减 ' + p.product + ' 等于 <strong>' + p.remainder + '</strong>。';
+            
+            this.createCell(container, '', 'cell-line animate-appear');
+            this.createCell(container, p.remainder, 'cell-remainder animate-appear highlight');
+            
+            const items = document.querySelectorAll('.object-item');
+            items.forEach((item, index) => {
+                if (index >= p.product) {
+                    item.style.transform = 'scale(1.3)';
+                    item.style.backgroundColor = '#ffeb3b';
+                }
+            });
+
+        } else if (step === 4) {
+            this.elements.demo.instruction.innerHTML = '第四步（比）：<br>余数 <strong>' + p.remainder + '</strong> 小于 除数 <strong>' + p.divisor + '</strong>。<br>计算完成！';
+            this.elements.demo.instruction.style.color = '#28a745';
+            this.elements.demo.btnNext.disabled = true;
+            this.elements.demo.btnReset.disabled = false;
+        }
+    }
+
+    resetDemoStep() {
+        this.initDemo();
+    }
+
+    // ================= PRACTICE MODE =================
+
+    initPractice() {
+        this.state.problem = this.generateProblem();
+        this.state.answered = false;
+        this.renderPracticeCalc();
+        this.elements.practice.feedback.textContent = '请在方框里填入正确的数字。';
+        this.elements.practice.feedback.className = 'feedback-box';
+        this.elements.practice.btnCheck.disabled = false;
+        this.elements.practice.btnCheck.textContent = "检查答案";
+        this.updateStatsDisplay();
+    }
+
+    renderPracticeCalc() {
+        const p = this.state.problem;
+        const container = this.elements.practice.calcContainer;
+        container.innerHTML = '';
+
+        this.createCell(container, p.divisor, 'cell-divisor');
+        this.createCell(container, '', 'cell-symbol');
+        
+        const divStr = p.dividend.toString();
+        if (divStr.length === 2) {
+            this.createCell(container, divStr[0], 'cell-dividend-tens');
+            this.createCell(container, divStr[1], 'cell-dividend-units');
+        } else {
+            this.createCell(container, divStr[0], 'cell-dividend-units');
+        }
+
+        this.inputs = {};
+        
+        const qInput = document.createElement('input');
+        qInput.type = 'number';
+        qInput.id = 'input-quotient';
+        const qWrapper = this.createCell(container, '', 'cell-quotient');
+        qWrapper.innerHTML = '';
+        qWrapper.appendChild(qInput);
+        this.inputs.quotient = qInput;
+
+        const prodStr = p.product.toString();
+        if (prodStr.length === 2) {
+            const pTensInput = document.createElement('input');
+            pTensInput.type = 'number';
+            const pTensWrapper = this.createCell(container, '', 'cell-product-tens');
+            pTensWrapper.innerHTML = '';
+            pTensWrapper.appendChild(pTensInput);
+            this.inputs.productTens = pTensInput;
+
+            const pUnitsInput = document.createElement('input');
+            pUnitsInput.type = 'number';
+            const pUnitsWrapper = this.createCell(container, '', 'cell-product-units');
+            pUnitsWrapper.innerHTML = '';
+            pUnitsWrapper.appendChild(pUnitsInput);
+            this.inputs.productUnits = pUnitsInput;
+        } else {
+            const pUnitsInput = document.createElement('input');
+            pUnitsInput.type = 'number';
+            const pUnitsWrapper = this.createCell(container, '', 'cell-product-units');
+            pUnitsWrapper.innerHTML = '';
+            pUnitsWrapper.appendChild(pUnitsInput);
+            this.inputs.productUnits = pUnitsInput;
+        }
+
+        this.createCell(container, '', 'cell-line');
+
+        const rInput = document.createElement('input');
+        rInput.type = 'number';
+        const rWrapper = this.createCell(container, '', 'cell-remainder');
+        rWrapper.innerHTML = '';
+        rWrapper.appendChild(rInput);
+        this.inputs.remainder = rInput;
+    }
+
+    checkAnswer() {
+        if (this.state.answered) return;
+
+        const p = this.state.problem;
+        let correct = true;
+        let errors = [];
+
+        const qVal = parseInt(this.inputs.quotient.value);
+        if (qVal === p.quotient) {
+            this.inputs.quotient.classList.add('correct');
+            this.inputs.quotient.classList.remove('incorrect');
+        } else {
+            this.inputs.quotient.classList.add('incorrect');
+            this.inputs.quotient.classList.remove('correct');
+            correct = false;
+            
+            if (qVal > p.quotient) errors.push('quotient_too_big');
+            else if (qVal < p.quotient) errors.push('quotient_too_small');
+            else errors.push('quotient_wrong');
+        }
+
+        const prodStr = p.product.toString();
+        let pVal = '';
+        let pCorrect = true;
+        if (prodStr.length === 2) {
+            const tVal = this.inputs.productTens.value;
+            const uVal = this.inputs.productUnits.value;
+            pVal = tVal + uVal;
+            
+            if (tVal === prodStr[0]) this.inputs.productTens.classList.add('correct');
+            else { this.inputs.productTens.classList.add('incorrect'); pCorrect = false; }
+            
+            if (uVal === prodStr[1]) this.inputs.productUnits.classList.add('correct');
+            else { this.inputs.productUnits.classList.add('incorrect'); pCorrect = false; }
+            
+        } else {
+            pVal = this.inputs.productUnits.value;
+             if (pVal === prodStr) {
+                 this.inputs.productUnits.classList.add('correct');
+             } else {
+                 this.inputs.productUnits.classList.add('incorrect');
+                 pCorrect = false;
+             }
+        }
+        
+        if (!pCorrect) {
+            correct = false;
+            errors.push('product_wrong');
+        }
+
+        const rVal = parseInt(this.inputs.remainder.value);
+        let rCorrect = true;
+        if (rVal === p.remainder) {
+            this.inputs.remainder.classList.add('correct');
+            this.inputs.remainder.classList.remove('incorrect');
+        } else {
+            this.inputs.remainder.classList.add('incorrect');
+            this.inputs.remainder.classList.remove('correct');
+            correct = false;
+            rCorrect = false;
+            
+            if (rVal >= p.divisor) errors.push('remainder_too_big');
+            else errors.push('remainder_calculation_wrong');
+        }
+
+        this.state.stats.total++;
+        if (correct) {
+            this.state.stats.correct++;
+            this.elements.practice.feedback.textContent = "太棒了！你全做对了！🎉";
+            this.elements.practice.feedback.style.backgroundColor = "#d4edda";
+            this.elements.practice.feedback.style.color = "#155724";
+        } else {
+            this.state.stats.mistakes.push({
+                problem: p,
+                errors: errors,
+                userValues: { q: qVal, p: pVal, r: rVal }
+            });
+
+            let msg = [];
+            if (errors.includes('quotient_too_big') || errors.includes('quotient_too_small') || errors.includes('quotient_wrong')) msg.push("商不对");
+            if (errors.includes('product_wrong')) msg.push("乘积不对");
+            if (!rCorrect) msg.push("余数不对");
+
+            this.elements.practice.feedback.textContent = "还有点小错误：" + msg.join("，") + "。再试一次吧！💪";
+            this.elements.practice.feedback.style.backgroundColor = "#f8d7da";
+            this.elements.practice.feedback.style.color = "#721c24";
+        }
+
+        this.state.answered = true;
+        this.elements.practice.btnCheck.disabled = true;
+        this.elements.practice.btnCheck.textContent = "已完成";
+        this.updateStatsDisplay();
+    }
+
+    updateStatsDisplay() {
+        this.elements.practice.statTotal.textContent = this.state.stats.total;
+        this.elements.practice.statCorrect.textContent = this.state.stats.correct;
+    }
+
+    // ================= REPORT LOGIC =================
+
+    showReport() {
+        const stats = this.state.stats;
+        const wrongCount = stats.total - stats.correct;
+        const score = stats.total === 0 ? 100 : Math.round((stats.correct / stats.total) * 100);
+
+        this.elements.report.score.textContent = score;
+        this.elements.report.total.textContent = stats.total;
+        this.elements.report.correct.textContent = stats.correct;
+        this.elements.report.wrong.textContent = wrongCount;
+
+        this.generateAnalysis(stats.mistakes);
+        this.renderWrongQuestions(stats.mistakes);
+
+        this.elements.report.modal.classList.remove('hidden');
+    }
+
+    hideReport() {
+        this.elements.report.modal.classList.add('hidden');
+    }
+
+    restartSession() {
+        this.state.stats = {
+            total: 0,
+            correct: 0,
+            mistakes: []
+        };
+        this.updateStatsDisplay();
+        this.initPractice();
+        this.hideReport();
+    }
+
+    generateAnalysis(mistakes) {
+        const list = this.elements.report.analysisList;
+        list.innerHTML = '';
+
+        if (mistakes.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = "目前表现完美！没有发现错题，继续保持！🌟";
+            list.appendChild(li);
+            return;
+        }
+
+        const errorCounts = {
+            quotient: 0,
+            product: 0,
+            remainder_calc: 0,
+            remainder_logic: 0
+        };
+
+        mistakes.forEach(m => {
+            if (m.errors.some(e => e.includes('quotient'))) errorCounts.quotient++;
+            if (m.errors.includes('product_wrong')) errorCounts.product++;
+            if (m.errors.includes('remainder_calculation_wrong')) errorCounts.remainder_calc++;
+            if (m.errors.includes('remainder_too_big')) errorCounts.remainder_logic++;
+        });
+
+        if (errorCounts.quotient > 0) {
+            const li = document.createElement('li');
+            li.textContent = '有 ' + errorCounts.quotient + ' 道题商选错了。建议：试商的时候，想乘法口诀，找那个积最接近被除数但比它小的数。';
+            list.appendChild(li);
+        }
+
+        if (errorCounts.product > 0) {
+            const li = document.createElement('li');
+            li.textContent = '有 ' + errorCounts.product + ' 道题乘积填错了。建议：多多复习乘法口诀表，特别是7、8、9的口诀哦！';
+            list.appendChild(li);
+        }
+
+        if (errorCounts.remainder_calc > 0) {
+            const li = document.createElement('li');
+            li.textContent = '有 ' + errorCounts.remainder_calc + ' 道题余数算错了。建议：做减法的时候要细心，可以用手指比划一下。';
+            list.appendChild(li);
+        }
+
+        if (errorCounts.remainder_logic > 0) {
+            const li = document.createElement('li');
+            li.textContent = '有 ' + errorCounts.remainder_logic + ' 道题余数比除数大了。⚠️ 记住黄金法则：余数一定要比除数小！';
+            li.style.color = '#d63384';
+            li.style.fontWeight = 'bold';
+            list.appendChild(li);
+        }
+    }
+
+    renderWrongQuestions(mistakes) {
+        const container = this.elements.report.wrongList;
+        container.innerHTML = '';
+
+        const recentMistakes = mistakes.slice(-5).reverse();
+
+        if (recentMistakes.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#888;">暂无错题记录</p>';
+            return;
+        }
+
+        recentMistakes.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'wrong-item';
+            
+            const problemText = m.problem.dividend + ' ÷ ' + m.problem.divisor + ' = ' + m.problem.quotient + ' ··· ' + m.problem.remainder;
+            
+            let detailText = [];
+            if (m.errors.some(e => e.includes('quotient'))) detailText.push('商填了' + (m.userValues.q || '空'));
+            if (m.errors.includes('product_wrong')) detailText.push('积填了' + (m.userValues.p || '空'));
+            if (m.errors.some(e => e.includes('remainder'))) detailText.push('余数填了' + (m.userValues.r || '空'));
+
+            div.innerHTML = '<div class="question">题目：' + m.problem.dividend + ' ÷ ' + m.problem.divisor + '</div><div class="detail">你的答案中有误：' + detailText.join('，') + '</div>';
+            container.appendChild(div);
+        });
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    new DivisionGame();
+});
+    </script>
+</body>
+</html>

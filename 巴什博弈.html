@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小熊抢蜂蜜 - 巴什博弈游戏</title>
+    <link rel="stylesheet" href="/styles/main.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Comic Sans MS', 'Microsoft YaHei', sans-serif;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffe4b5 50%, #ffdab9 100%);
+        min-height: 100vh;
+        padding: 20px;
+        overflow-x: hidden;
+      }
+
+      .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        border: 4px solid #f4a460;
+      }
+
+      /* 标题区域 */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .title {
+        font-size: 2.2em;
+        color: #e67e22;
+        text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(230, 126, 34, 0.3);
+        margin-bottom: 10px;
+      }
+
+      .story-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin: 15px 0;
+        border: 3px dashed #81c784;
+        position: relative;
+      }
+
+      .story-title {
+        font-size: 1.2em;
+        color: #2e7d32;
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .story-text {
+        color: #388e3c;
+        line-height: 1.8;
+        font-size: 1.05em;
+      }
+
+      /* 规则区域 */
+      .rules-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 12px;
+        padding: 14px 20px;
+        margin: 12px 0;
+        border: 2px solid #64b5f6;
+      }
+
+      .rules-title {
+        font-size: 1.1em;
+        color: #1565c0;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .rules-text {
+        color: #1976d2;
+        font-size: 0.95em;
+        line-height: 1.7;
+      }
+
+      .highlight {
+        background: #ffeb3b;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: bold;
+        color: #e65100;
+      }
+
+      /* 游戏信息区 */
+      .game-info {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .info-card {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-radius: 14px;
+        padding: 14px 22px;
+        text-align: center;
+        border: 3px solid #ffb74d;
+        min-width: 140px;
+      }
+
+      .info-label {
+        font-size: 0.9em;
+        color: #ef6c00;
+        margin-bottom: 4px;
+      }
+
+      .info-value {
+        font-size: 1.6em;
+        font-weight: bold;
+        color: #e65100;
+      }
+
+      /* 玩家区域 */
+      .players-area {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .player-card {
+        width: 180px;
+        padding: 18px;
+        border-radius: 18px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 4px solid transparent;
+      }
+
+      .player-card.player-a {
+        background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+        border-color: #ec407a;
+      }
+
+      .player-card.player-b {
+        background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+        border-color: #5c6bc0;
+      }
+
+      .player-card.active {
+        transform: scale(1.08);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .player-card.active.player-a {
+        border-color: #e91e63;
+        animation: pulse-pink 1.5s infinite;
+      }
+
+      .player-card.active.player-b {
+        border-color: #3f51b5;
+        animation: pulse-blue 1.5s infinite;
+      }
+
+      /* 玩家得分显示 */
+      .player-score {
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 0.88em;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .player-a .player-score {
+        background: rgba(236, 64, 122, 0.15);
+        color: #c2185b;
+      }
+
+      .player-b .player-score {
+        background: rgba(92, 107, 192, 0.15);
+        color: #303f9f;
+      }
+
+      .score-num {
+        font-size: 1.35em;
+      }
+
+      @keyframes pulse-pink {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.4); }
+        50% { box-shadow: 0 0 0 12px rgba(233, 30, 99, 0); }
+      }
+
+      @keyframes pulse-blue {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(63, 81, 181, 0.4); }
+        50% { box-shadow: 0 0 0 12px rgba(63, 81, 181, 0); }
+      }
+
+      .player-avatar {
+        font-size: 3em;
+        margin-bottom: 8px;
+      }
+
+      .player-name {
+        font-size: 1.25em;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      .player-a .player-name { color: #c2185b; }
+      .player-b .player-name { color: #303f9f; }
+
+      .player-hint {
+        font-size: 0.85em;
+        opacity: 0.8;
+      }
+
+      /* 蜂蜜罐显示区 */
+      .honey-display {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        border-radius: 18px;
+        padding: 24px;
+        margin: 20px 0;
+        border: 3px solid #ffc107;
+        min-height: 120px;
+      }
+
+      .honey-title {
+        text-align: center;
+        color: #f57f17;
+        font-size: 1.15em;
+        margin-bottom: 14px;
+        font-weight: bold;
+      }
+
+      .honey-jars {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        min-height: 60px;
+      }
+
+      .honey-jar {
+        font-size: 2.2em;
+        animation: jar-appear 0.4s ease-out;
+        transition: all 0.3s ease;
+      }
+
+      .honey-jar.taken {
+        animation: jar-disappear 0.4s ease-out forwards;
+      }
+
+      @keyframes jar-appear {
+        from { transform: scale(0) rotate(-20deg); opacity: 0; }
+        to { transform: scale(1) rotate(0); opacity: 1; }
+      }
+
+      @keyframes jar-disappear {
+        to { transform: scale(0) rotate(20deg); opacity: 0; }
+      }
+
+      .honey-count {
+        text-align: center;
+        font-size: 1.3em;
+        color: #e65100;
+        font-weight: bold;
+        margin-top: 12px;
+      }
+
+      /* 操作按钮区 */
+      .action-area {
+        text-align: center;
+        margin: 24px 0;
+      }
+
+      .action-title {
+        font-size: 1.15em;
+        color: #5d4037;
+        margin-bottom: 14px;
+        font-weight: bold;
+      }
+
+      .take-buttons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .take-btn {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        border: 3px solid;
+        font-size: 1.6em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+      }
+
+      .take-btn:hover:not(:disabled) {
+        transform: translateY(-4px) scale(1.08);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .take-btn:active:not(:disabled) {
+        transform: translateY(0) scale(0.96);
+      }
+
+      .take-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .take-btn span {
+        font-size: 0.45em;
+        font-weight: normal;
+      }
+
+      .btn-style-1 {
+        background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
+        border-color: #66bb6a;
+        color: #1b5e20;
+      }
+
+      .btn-style-2 {
+        background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%);
+        border-color: #42a5f5;
+        color: #0d47a1;
+      }
+
+      .btn-style-3 {
+        background: linear-gradient(135deg, #ffe082 0%, #ffd54f 100%);
+        border-color: #ffca28;
+        color: #e65100;
+      }
+
+      .btn-style-4 {
+        background: linear-gradient(135deg, #ce93d8 0%, #ba68c8 100%);
+        border-color: #ab47bc;
+        color: #4a148c;
+      }
+
+      .btn-style-5 {
+        background: linear-gradient(135deg, #ffab91 0%, #ff8a65 100%);
+        border-color: #ff7043;
+        color: #bf360c;
+      }
+
+      /* 控制按钮 */
+      .control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+
+      .control-btn {
+        padding: 12px 28px;
+        border-radius: 14px;
+        border: 3px solid;
+        font-size: 1.05em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .control-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .btn-new-game {
+        background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+        border-color: #03a9f4;
+        color: #01579b;
+      }
+
+      .btn-random {
+        background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+        border-color: #ff9800;
+        color: #e65100;
+      }
+
+      /* 游戏记录 */
+      .history-area {
+        background: linear-gradient(135deg, #fafafa 0%, #eeeeee 100%);
+        border-radius: 14px;
+        padding: 18px;
+        margin: 20px 0;
+        border: 2px solid #bdbdbd;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .history-title {
+        font-size: 1.05em;
+        color: #616161;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .history-list {
+        list-style: none;
+      }
+
+      .history-item {
+        padding: 8px 14px;
+        margin: 6px 0;
+        border-radius: 10px;
+        font-size: 0.95em;
+        animation: slide-in 0.3s ease-out;
+      }
+
+      @keyframes slide-in {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      .history-item.player-a-action {
+        background: linear-gradient(90deg, #fce4ec 0%, #fff 100%);
+        border-left: 4px solid #ec407a;
+        color: #c2185b;
+      }
+
+      .history-item.player-b-action {
+        background: linear-gradient(90deg, #e8eaf6 0%, #fff 100%);
+        border-left: 4px solid #5c6bc0;
+        color: #303f9f;
+      }
+
+      .history-item.system-msg {
+        background: linear-gradient(90deg, #fff8e1 0%, #fff 100%);
+        border-left: 4px solid #ffc107;
+        color: #f57f17;
+        text-align: center;
+      }
+
+      /* 胜利弹窗 */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fade-in 0.3s ease;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 24px;
+        padding: 36px;
+        text-align: center;
+        max-width: 400px;
+        animation: bounce-in 0.5s ease;
+        border: 4px solid;
+      }
+
+      .modal-content.winner-a {
+        border-color: #ec407a;
+        background: linear-gradient(135deg, #fff 0%, #fce4ec 100%);
+      }
+
+      .modal-content.winner-b {
+        border-color: #5c6bc0;
+        background: linear-gradient(135deg, #fff 0%, #e8eaf6 100%);
+      }
+
+      @keyframes bounce-in {
+        0% { transform: scale(0.5); opacity: 0; }
+        60% { transform: scale(1.08); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+
+      .modal-emoji {
+        font-size: 4em;
+        margin-bottom: 12px;
+        animation: celebrate 0.8s ease infinite alternate;
+      }
+
+      @keyframes celebrate {
+        from { transform: rotate(-10deg) scale(1); }
+        to { transform: rotate(10deg) scale(1.1); }
+      }
+
+      .modal-title {
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .winner-a .modal-title { color: #c2185b; }
+      .winner-b .modal-title { color: #303f9f; }
+
+      .modal-desc {
+        font-size: 1.1em;
+        color: #666;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .modal-btn {
+        padding: 12px 36px;
+        border-radius: 14px;
+        border: none;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        transition: all 0.2s ease;
+      }
+
+      .winner-a .modal-btn { background: linear-gradient(135deg, #ec407a 0%, #e91e63 100%); }
+      .winner-b .modal-btn { background: linear-gradient(135deg, #5c6bc0 0%, #3f51b5 100%); }
+
+      .modal-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      /* 先手选择区 */
+      .first-player-area {
+        text-align: center;
+        margin: 18px 0;
+      }
+
+      .first-player-title {
+        font-size: 1.1em;
+        color: #5d4037;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+
+      .first-player-options {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .first-player-btn {
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: 3px solid #ccc;
+        font-size: 1.05em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        color: #666;
+      }
+
+      .first-player-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      .first-player-btn.selected-a {
+        background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+        border-color: #ec407a;
+        color: #c2185b;
+        box-shadow: 0 4px 15px rgba(236, 64, 122, 0.3);
+        transform: scale(1.05);
+      }
+
+      .first-player-btn.selected-b {
+        background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+        border-color: #5c6bc0;
+        color: #303f9f;
+        box-shadow: 0 4px 15px rgba(92, 107, 192, 0.3);
+        transform: scale(1.05);
+      }
+
+      /* 难度选择区 */
+      .difficulty-area {
+        text-align: center;
+        margin: 18px 0;
+      }
+
+      .difficulty-title {
+        font-size: 1.1em;
+        color: #5d4037;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+
+      .difficulty-options {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .diff-btn {
+        padding: 12px 22px;
+        border-radius: 14px;
+        border: 3px solid #ccc;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        background: white;
+        color: #666;
+        min-width: 90px;
+      }
+
+      .diff-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      .diff-btn .diff-emoji { font-size: 1.5em; }
+      .diff-btn .diff-name { font-size: 1em; }
+      .diff-btn .diff-desc { font-size: 0.75em; opacity: 0.7; font-weight: normal; }
+
+      .diff-btn.selected-easy {
+        background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+        border-color: #66bb6a;
+        color: #2e7d32;
+        box-shadow: 0 4px 15px rgba(102, 187, 106, 0.35);
+        transform: scale(1.06);
+      }
+
+      .diff-btn.selected-medium {
+        background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+        border-color: #ffa726;
+        color: #e65100;
+        box-shadow: 0 4px 15px rgba(255, 167, 38, 0.35);
+        transform: scale(1.06);
+      }
+
+      .diff-btn.selected-hard {
+        background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+        border-color: #ef5350;
+        color: #c62828;
+        box-shadow: 0 4px 15px rgba(239, 83, 80, 0.35);
+        transform: scale(1.06);
+      }
+
+      .diff-btn.selected-custom {
+        background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%);
+        border-color: #ab47bc;
+        color: #6a1b9a;
+        box-shadow: 0 4px 15px rgba(171, 71, 188, 0.35);
+        transform: scale(1.06);
+      }
+
+      /* 自定义出题面板 */
+      .custom-panel {
+        display: none;
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin: 14px auto 0;
+        max-width: 480px;
+        border: 3px dashed #ab47bc;
+        animation: slide-down 0.3s ease-out;
+      }
+
+      .custom-panel.show { display: block; }
+
+      @keyframes slide-down {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .custom-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .custom-label {
+        font-size: 0.95em;
+        color: #6a1b9a;
+        font-weight: bold;
+        min-width: 120px;
+        text-align: right;
+      }
+
+      .custom-input {
+        width: 70px;
+        height: 40px;
+        border-radius: 10px;
+        border: 2px solid #ce93d8;
+        font-size: 1.15em;
+        text-align: center;
+        font-weight: bold;
+        color: #6a1b9a;
+        outline: none;
+        transition: border-color 0.2s;
+        font-family: inherit;
+      }
+
+      .custom-input:focus {
+        border-color: #ab47bc;
+        box-shadow: 0 0 0 3px rgba(171, 71, 188, 0.2);
+      }
+
+      .custom-input::placeholder {
+        color: #b39ddb;
+        font-size: 0.85em;
+      }
+
+      .custom-hint {
+        font-size: 0.82em;
+        color: #8e24aa;
+      }
+
+      .custom-submit-row {
+        text-align: center;
+        margin-top: 8px;
+      }
+
+      .btn-custom-start {
+        padding: 12px 30px;
+        border-radius: 14px;
+        border: none;
+        font-size: 1.08em;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
+        transition: all 0.2s ease;
+      }
+
+      .btn-custom-start:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(142, 36, 170, 0.35);
+      }
+
+      .custom-error {
+        text-align: center;
+        color: #c62828;
+        font-size: 0.9em;
+        font-weight: bold;
+        margin-top: 8px;
+        min-height: 20px;
+      }
+
+      /* 控制按钮 */
+      .control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+      .tip-box {
+        background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin: 16px 0;
+        border: 2px dashed #ffd54f;
+      }
+
+      .tip-title {
+        font-size: 1em;
+        color: #f9a825;
+        font-weight: bold;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tip-text {
+        color: #f57f17;
+        font-size: 0.92em;
+        line-height: 1.6;
+      }
+
+      /* 音效开关 */
+      .sound-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid #ffb74d;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        font-size: 1.4em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      .sound-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      }
+
+      .sound-toggle.muted {
+        opacity: 0.5;
+        border-color: #bdbdbd;
+        background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+      }
+
+      /* 响应式 */
+      @media (max-width: 600px) {
+        .game-container { padding: 18px; }
+        .title { font-size: 1.6em; }
+        .player-card { width: 140px; padding: 12px; }
+        .player-avatar { font-size: 2.2em; }
+        .take-btn { width: 58px; height: 58px; font-size: 1.35em; }
+        .players-area { gap: 16px; }
+      }
+
+      /* 纸屑动画容器 */
+      .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 999;
+        overflow: hidden;
+        display: none;
+      }
+
+      .confetti-container.show { display: block; }
+
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        top: -10px;
+        animation: confetti-fall 3s linear forwards;
+      }
+
+      @keyframes confetti-fall {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 音效开关 -->
+    <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()" title="音效开关">🔊</button>
+
+    <div class="game-container">
+      <!-- 标题 -->
+      <div class="header">
+        <h1 class="title">🍯 小熊抢蜂蜜 🐻</h1>
+      </div>
+
+      <!-- 故事背景 -->
+      <div class="story-box">
+        <div class="story-title">📖 故事背景</div>
+        <div class="story-text">
+          在美丽的森林里，聪明的<span class="highlight">小熊（甲方）</span>和可爱的<span class="highlight">小兔（乙方）</span>发现了一堆香甜的蜂蜜罐！<br/>
+          他们决定玩一个有趣的游戏：两人轮流拿蜂蜜罐，每次至少拿 <span id="rule-min" class="highlight">1</span> 个，
+          最多拿 <span id="rule-max" class="highlight">?</span> 个。<strong>谁拿到最后一个蜂蜜罐，谁就赢得所有蜂蜜！</strong><br/>
+          小朋友，你想帮谁赢呢？快来试试吧！
+        </div>
+      </div>
+
+      <!-- 游戏规则 -->
+      <div class="rules-box">
+        <div class="rules-title">📋 游戏规则</div>
+        <div class="rules-text">
+          总共有 <span id="total-honey" class="highlight">?</span> 个蜂蜜罐 | 
+          每次最少拿 <span id="min-take" class="highlight">1</span> 个 | 
+          每次最多拿 <span id="max-take" class="highlight">?</span> 个<br/>
+          <strong>💡 秘诀：想办法让自己拿到最后一个哦！</strong>
+        </div>
+      </div>
+
+      <!-- 游戏信息 -->
+      <div class="game-info">
+        <div class="info-card">
+          <div class="info-label">🍯 剩余蜂蜜罐</div>
+          <div class="info-value" id="remaining">?</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">🔄 当前回合</div>
+          <div class="info-value" id="round-num">1</div>
+        </div>
+      </div>
+
+      <!-- 玩家区域 -->
+      <div class="players-area">
+        <div class="player-card player-a active" id="card-a">
+          <div class="player-avatar">🐻</div>
+          <div class="player-name">小熊（甲方）</div>
+          <div class="player-hint" id="hint-a">轮到你啦！</div>
+          <div class="player-score" id="score-a">已拿: <span class="score-num" id="score-a-num">0</span> 个 🍯</div>
+        </div>
+        <div class="player-card player-b" id="card-b">
+          <div class="player-avatar">🐰</div>
+          <div class="player-name">小兔（乙方）</div>
+          <div class="player-hint" id="hint-b">请等待...</div>
+          <div class="player-score" id="score-b">已拿: <span class="score-num" id="score-b-num">0</span> 个 🍯</div>
+        </div>
+      </div>
+
+      <!-- 蜂蜜罐显示 -->
+      <div class="honey-display">
+        <div class="honey-title">🍯 蜂蜜罐展示区</div>
+        <div class="honey-jars" id="jars-container"></div>
+        <div class="honey-count">还剩 <strong id="jar-count">?</strong> 个蜂蜜罐</div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="action-area">
+        <div class="action-title" id="action-title">🐻 小熊，你要拿几个蜂蜜罐？</div>
+        <div class="take-buttons" id="take-buttons"></div>
+      </div>
+
+      <!-- 策略提示 -->
+      <div class="tip-box" id="tip-box">
+        <div class="tip-title">💡 小提示</div>
+        <div class="tip-text" id="tip-text">点击下方数字按钮选择要拿取的数量吧！</div>
+      </div>
+
+      <!-- 先手选择 -->
+      <div class="first-player-area">
+        <div class="first-player-title">🎯 选择谁先手</div>
+        <div class="first-player-options">
+          <button class="first-player-btn selected-a" id="fp-btn-a" onclick="selectFirstPlayer('A')">
+            🐻 小熊（甲方）先拿
+          </button>
+          <button class="first-player-btn" id="fp-btn-b" onclick="selectFirstPlayer('B')">
+            🐰 小兔（乙方）先拿
+          </button>
+        </div>
+      </div>
+
+      <!-- 难度选择 -->
+      <div class="difficulty-area">
+        <div class="difficulty-title">🎮 选择难度 / 出题方式</div>
+        <div class="difficulty-options">
+          <button class="diff-btn selected-easy" id="diff-easy" onclick="selectDifficulty('easy')">
+            <span class="diff-emoji">⭐</span>
+            <span class="diff-name">简单</span>
+            <span class="diff-desc">8~15个，每次1~3</span>
+          </button>
+          <button class="diff-btn" id="diff-medium" onclick="selectDifficulty('medium')">
+            <span class="diff-emoji">⭐⭐</span>
+            <span class="diff-name">中等</span>
+            <span class="diff-desc">16~30个，每次2~5</span>
+          </button>
+          <button class="diff-btn" id="diff-hard" onclick="selectDifficulty('hard')">
+            <span class="diff-emoji">⭐⭐⭐</span>
+            <span class="diff-name">困难</span>
+            <span class="diff-desc">31~60个，每次3~9</span>
+          </button>
+          <button class="diff-btn" id="diff-custom" onclick="selectDifficulty('custom')">
+            <span class="diff-emoji">✏️</span>
+            <span class="diff-name">自己出题</span>
+            <span class="diff-desc">自定义参数</span>
+          </button>
+        </div>
+
+        <!-- 自定义出题面板 -->
+        <div class="custom-panel" id="custom-panel">
+          <div class="custom-row">
+            <label class="custom-label" for="custom-total">蜂蜜罐总数：</label>
+            <input type="number" class="custom-input" id="custom-total" min="5" max="99" placeholder="5~99" />
+            <span class="custom-hint">（5 ~ 99 之间）</span>
+          </div>
+          <div class="custom-row">
+            <label class="custom-label" for="custom-max">每次最多拿：</label>
+            <input type="number" class="custom-input" id="custom-max" min="1" max="9" placeholder="1~9" />
+            <span class="custom-hint">（1 ~ 9 之间）</span>
+          </div>
+          <div class="custom-error" id="custom-error"></div>
+          <div class="custom-submit-row">
+            <button class="btn-custom-start" onclick="startCustomGame()">🚀 开始游戏</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 控制按钮 -->
+      <div class="control-buttons">
+        <button class="control-btn btn-new-game" onclick="startNewGame()">🔄 重新开始</button>
+        <button class="control-btn btn-random" onclick="startSelectedGame()">🎲 开始游戏</button>
+      </div>
+
+      <!-- 游戏记录 -->
+      <div class="history-area">
+        <div class="history-title">📝 游戏记录</div>
+        <ul class="history-list" id="history-list">
+          <li class="history-item system-msg">游戏准备中...点击「随机出题」开始！</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 胜利弹窗 -->
+    <div class="modal-overlay" id="win-modal">
+      <div class="modal-content" id="modal-inner">
+        <div class="modal-emoji" id="win-emoji">🎉</div>
+        <div class="modal-title" id="win-title">恭喜获胜！</div>
+        <div class="modal-desc" id="win-desc">你太棒了！</div>
+        <button class="modal-btn" onclick="closeModal()">再玩一局</button>
+      </div>
+    </div>
+
+    <!-- 纸屑效果 -->
+    <div class="confetti-container" id="confetti"></div>
+
+    <script>
+      // ===== 音效系统（Web Audio API） =====
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function getAudioCtx() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      // 音效开关
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('sound-toggle');
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.className = 'sound-toggle' + (soundEnabled ? '' : ' muted');
+        if (soundEnabled) {
+          // 开启时播放一个轻声确认
+          playTone(700, 0.1, 'sine', 0.15);
+        }
+      }
+
+      // 通用：播放一个音符（受静音控制）
+      function playTone(freq, duration, type, volume, delay) {
+        if (!soundEnabled) return;
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + (delay || 0));
+        gain.gain.setValueAtTime(0, ctx.currentTime + (delay || 0));
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + (delay || 0) + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (delay || 0) + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + (delay || 0));
+        osc.stop(ctx.currentTime + (delay || 0) + duration);
+      }
+
+      // 🔘 按钮点击音效 — 清脆短促的 "波"
+      function playClickSound() {
+        playTone(800, 0.08, 'sine', 0.3);
+        playTone(1000, 0.06, 'sine', 0.15, 0.03);
+      }
+
+      // 🎲 随机出题音效 — 上升琶音 "叮咚~"
+      function playStartSound() {
+        const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+        notes.forEach((freq, i) => {
+          playTone(freq, 0.25, 'sine', 0.25, i * 0.1);
+        });
+      }
+
+      // 🔄 重新开始音效 — 轻柔下降
+      function playRestartSound() {
+        const notes = [784, 659, 523]; // G5 E5 C5
+        notes.forEach((freq, i) => {
+          playTone(freq, 0.2, 'sine', 0.22, i * 0.08);
+        });
+      }
+
+      // 🍯 拿取蜂蜜罐音效 — 弹跳感 "蹦~"
+      function playTakeSound(count) {
+        // 根据拿取数量调整音高，拿越多越低沉
+        const baseFreq = Math.max(400, 700 - count * 50);
+        playTone(baseFreq, 0.12, 'sine', 0.3);
+        playTone(baseFreq * 1.5, 0.1, 'sine', 0.18, 0.06);
+        // 加一点三角波增加质感
+        playTone(baseFreq * 0.8, 0.08, 'triangle', 0.1, 0.04);
+      }
+
+      // 🔄 切换玩家音效 — 轻柔过渡
+      function playSwitchSound() {
+        playTone(600, 0.1, 'sine', 0.15);
+        playTone(500, 0.15, 'sine', 0.12, 0.08);
+      }
+
+      // 🏆 胜利音效 — 欢快庆祝旋律
+      function playWinSound() {
+        // 胜利号角旋律
+        const melody = [
+          { freq: 523, dur: 0.15, delay: 0 },     // C5
+          { freq: 659, dur: 0.15, delay: 0.12 },   // E5
+          { freq: 784, dur: 0.15, delay: 0.24 },   // G5
+          { freq: 1047, dur: 0.35, delay: 0.36 },  // C6 (长音)
+          { freq: 784, dur: 0.12, delay: 0.55 },   // G5
+          { freq: 1047, dur: 0.45, delay: 0.65 },  // C6 (长收尾)
+        ];
+        melody.forEach(n => {
+          playTone(n.freq, n.dur, 'sine', 0.28, n.delay);
+        });
+        // 叠加一个低频和声
+        setTimeout(() => {
+          playTone(262, 0.8, 'triangle', 0.12); // C3 低音铺垫
+        }, 50);
+      }
+
+      // ✨ 先手选择音效 — 轻轻 "嘀"
+      function playSelectSound() {
+        playTone(900, 0.07, 'sine', 0.2);
+        playTone(1100, 0.05, 'sine', 0.12, 0.04);
+      }
+
+      // ❌ 关闭弹窗音效
+      function playCloseSound() {
+        playTone(600, 0.08, 'sine', 0.18);
+        playTone(450, 0.12, 'sine', 0.14, 0.05);
+      }
+
+      // ===== 游戏状态 =====
+      let totalJars = 0;       // 蜂蜜罐总数
+      let remainingJars = 0;   // 剩余数量
+      let maxTake = 0;         // 每次最多拿的数量
+      let currentPlayer = 'A'; // 当前玩家 A=小熊 B=小兔
+      let firstPlayer = 'A';   // 先手选择 A=小熊 B=小兔
+      let roundNumber = 1;     // 回合数
+      let gameStarted = false; // 游戏是否开始
+      let currentDifficulty = 'easy'; // 当前难度: easy / medium / hard / custom
+      let playerATotal = 0;    // 小熊（甲方）已拿总数
+      let playerBTotal = 0;    // 小兔（乙方）已拿总数
+
+      // 难度配置（符合二年级认知标准）
+      const DIFFICULTY_CONFIG = {
+        easy:   { name: '简单', totalMin: 8,  totalMax: 15, maxTakeMin: 1, maxTakeMax: 3 },
+        medium: { name: '中等', totalMin: 16, totalMax: 30, maxTakeMin: 2, maxTakeMax: 5 },
+        hard:   { name: '困难', totalMin: 31, totalMax: 60, maxTakeMin: 3, maxTakeMax: 9 }
+      };
+
+      const PLAYER_NAMES = { A: '小熊（甲方）', B: '小兔（乙方）' };
+      const PLAYER_EMOJI = { A: '🐻', B: '🐰' };
+      const BTN_STYLES = ['btn-style-1', 'btn-style-2', 'btn-style-3', 'btn-style-4', 'btn-style-5'];
+
+      // ===== 初始化 =====
+      function init() {
+        updateDisplay();
+        renderJars();
+        renderTakeButtons();
+        updateScores();
+      }
+
+      // ===== 更新双方拿取总数显示 =====
+      function updateScores() {
+        document.getElementById('score-a-num').textContent = playerATotal;
+        document.getElementById('score-b-num').textContent = playerBTotal;
+      }
+
+      // ===== 选择先手 =====
+      function selectFirstPlayer(player) {
+        playSelectSound();
+        firstPlayer = player;
+        const btnA = document.getElementById('fp-btn-a');
+        const btnB = document.getElementById('fp-btn-b');
+        btnA.className = 'first-player-btn' + (player === 'A' ? ' selected-a' : '');
+        btnB.className = 'first-player-btn' + (player === 'B' ? ' selected-b' : '');
+
+        if (!gameStarted) {
+          currentPlayer = player;
+          updateDisplay();
+          updatePlayerCards();
+          updateTip(`已选择 ${PLAYER_NAMES[player]} 先手！选择难度后点击「开始游戏」！`);
+        }
+      }
+
+      // ===== 选择难度 =====
+      function selectDifficulty(diff) {
+        playClickSound();
+        currentDifficulty = diff;
+
+        // 更新所有难度按钮样式
+        const diffs = ['easy', 'medium', 'hard', 'custom'];
+        const styleMap = { easy: 'selected-easy', medium: 'selected-medium', hard: 'selected-hard', custom: 'selected-custom' };
+        diffs.forEach(d => {
+          const btn = document.getElementById('diff-' + d);
+          btn.className = 'diff-btn' + (d === diff ? ' ' + styleMap[d] : '');
+        });
+
+        // 显示/隐藏自定义面板
+        const panel = document.getElementById('custom-panel');
+        if (diff === 'custom') {
+          panel.classList.add('show');
+          updateTip('✏️ 请填写蜂蜜罐总数和每次最多拿的数量，然后点击「开始游戏」！');
+        } else {
+          panel.classList.remove('show');
+          const cfg = DIFFICULTY_CONFIG[diff];
+          updateTip(`已选择「${cfg.name}」模式：总数 ${cfg.totalMin}~${cfg.totalMax}，每次拿 1~${cfg.maxTakeMax} 个。点击「开始游戏」！`);
+        }
+      }
+
+      // ===== 根据当前难度开始游戏 =====
+      function startSelectedGame() {
+        if (currentDifficulty === 'custom') {
+          startCustomGame();
+        } else {
+          randomGame(currentDifficulty);
+        }
+      }
+
+      // ===== 自定义出题开始游戏 =====
+      function startCustomGame() {
+        const totalInput = document.getElementById('custom-total');
+        const maxInput = document.getElementById('custom-max');
+        const errorEl = document.getElementById('custom-error');
+
+        const total = parseInt(totalInput.value);
+        const max = parseInt(maxInput.value);
+
+        // 校验输入
+        errorEl.textContent = '';
+        if (isNaN(total) || total < 5 || total > 99) {
+          errorEl.textContent = '❌ 蜂蜜罐总数请在 5 ~ 99 之间哦！';
+          playClickSound();
+          return;
+        }
+        if (isNaN(max) || max < 1 || max > 9) {
+          errorEl.textContent = '❌ 每次最多拿的数量请在 1 ~ 9 之间哦！';
+          playClickSound();
+          return;
+        }
+        if (max >= total) {
+          errorEl.textContent = `❌ 每次最多拿 ${max} 个，但总共只有 ${total} 个，这样先手直接就赢啦！请调整一下~`;
+          playClickSound();
+          return;
+        }
+
+        // 启动游戏
+        totalJars = total;
+        maxTake = max;
+        remainingJars = totalJars;
+        currentPlayer = firstPlayer;
+        roundNumber = 1;
+        playerATotal = 0;
+        playerBTotal = 0;
+        gameStarted = true;
+
+        // 更新界面
+        document.getElementById('rule-min').textContent = '1';
+        document.getElementById('rule-max').textContent = maxTake;
+        document.getElementById('total-honey').textContent = totalJars;
+        document.getElementById('min-take').textContent = '1';
+        document.getElementById('max-take').textContent = maxTake;
+
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = `<li class="history-item system-msg">
+          ✏️ 自定义出题：${totalJars} 个蜂蜜罐，每次可拿 1~${maxTake} 个
+        </li>`;
+
+        addHistory(`✏️ 自定义出题：${totalJars} 个蜂蜜罐，每次拿 1~${maxTake} 个`, 'system');
+
+        playStartSound();
+        updateDisplay();
+        renderJars();
+        renderTakeButtons();
+        updatePlayerCards();
+        updateScores();
+        updateTip(`自定义题目开始啦！${PLAYER_NAMES[firstPlayer]} 先手，请选择要拿的数量！`);
+      }
+
+      // ===== 随机出题（按难度） =====
+      function randomGame(difficulty) {
+        playStartSound();
+
+        // 根据难度生成参数
+        const cfg = DIFFICULTY_CONFIG[difficulty || currentDifficulty];
+        maxTake = cfg.maxTakeMin + Math.floor(Math.random() * (cfg.maxTakeMax - cfg.maxTakeMin + 1));
+        // 确保总数 > maxTake，游戏有意义
+        const minTotal = maxTake + 2;
+        const actualMin = Math.max(minTotal, cfg.totalMin);
+        totalJars = actualMin + Math.floor(Math.random() * (cfg.totalMax - actualMin + 1));
+        remainingJars = totalJars;
+        currentPlayer = firstPlayer;
+        roundNumber = 1;
+        gameStarted = true;
+
+        // 更新界面
+        document.getElementById('rule-min').textContent = '1';
+        document.getElementById('rule-max').textContent = maxTake;
+        document.getElementById('total-honey').textContent = totalJars;
+        document.getElementById('min-take').textContent = '1';
+        document.getElementById('max-take').textContent = maxTake;
+
+        // 清空历史
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = `<li class="history-item system-msg">
+          🎮 新游戏开始！共 ${totalJars} 个蜂蜜罐，每次可拿 1~${maxTake} 个
+        </li>`;
+
+        addHistory(`🎲 ${cfg.name}模式：${totalJars} 个蜂蜜罐，每次拿 1~${maxTake} 个`, 'system');
+
+        updateDisplay();
+        renderJars();
+        renderTakeButtons();
+        updatePlayerCards();
+        updateScores();
+        updateTip(`「${cfg.name}」模式开始啦！${PLAYER_NAMES[firstPlayer]} 先手（共${totalJars}个，每次1~${maxTake}个），请选择要拿的数量！`);
+      }
+
+      // ===== 重新开始（保持当前题目）=====
+      function startNewGame() {
+        if (!gameStarted) {
+          startSelectedGame();
+          return;
+        }
+        playRestartSound();
+        remainingJars = totalJars;
+        currentPlayer = firstPlayer;
+        roundNumber = 1;
+        playerATotal = 0;
+        playerBTotal = 0;
+
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = `<li class="history-item system-msg">
+          🔄 重新开始！共 ${totalJars} 个蜂蜜罐，每次可拿 1~${maxTake} 个
+        </li>`;
+
+        updateDisplay();
+        renderJars();
+        renderTakeButtons();
+        updatePlayerCards();
+        updateScores();
+        updateTip('重新开始！' + PLAYER_NAMES[firstPlayer] + ' 先手！');
+      }
+
+      // ===== 拿取蜂蜜罐 =====
+      function takeJars(count) {
+        if (!gameStarted || count < 1 || count > maxTake || count > remainingJars) return;
+
+        // 播放拿取音效
+        playTakeSound(count);
+
+        const player = currentPlayer;
+        const playerName = PLAYER_NAMES[player];
+        const emoji = PLAYER_EMOJI[player];
+
+        // 累加该玩家拿取总数
+        if (player === 'A') { playerATotal += count; } else { playerBTotal += count; }
+        updateScores();
+
+        // 记录历史
+        addHistory(`${emoji} ${playerName} 拿了 ${count} 个蜂蜜罐`, player.toLowerCase());
+
+        // 更新剩余数量
+        remainingJars -= count;
+        roundNumber++;
+
+        // 检查胜负
+        if (remainingJars === 0) {
+          showWinner(player);
+          return;
+        }
+
+        // 切换玩家
+        currentPlayer = currentPlayer === 'A' ? 'B' : 'A';
+        playSwitchSound();
+
+        updateDisplay();
+        renderJars();
+        renderTakeButtons();
+        updatePlayerCards();
+
+        // 更新策略提示
+        generateTip();
+      }
+
+      // ===== 显示胜利 =====
+      function showWinner(winner) {
+        playWinSound();
+        const modal = document.getElementById('win-modal');
+        const inner = document.getElementById('modal-inner');
+        const emoji = document.getElementById('win-emoji');
+        const title = document.getElementById('win-title');
+        const desc = document.getElementById('win-desc');
+
+        if (winner === 'A') {
+          inner.className = 'modal-content winner-a';
+          emoji.textContent = '🐻';
+          title.textContent = '小熊获胜啦！';
+          desc.textContent = `聪明的小熊用了 ${roundNumber} 回合拿到最后一个！\n📊 小熊共拿 ${playerATotal} 个 | 小兔共拿 ${playerBTotal} 个\n小熊可以美美地享用蜂蜜大餐了！🍯`;
+        } else {
+          inner.className = 'modal-content winner-b';
+          emoji.textContent = '🐰';
+          title.textContent = '小兔获胜啦！';
+          desc.textContent = `可爱的小兔用了 ${roundNumber} 回合拿到最后一个！\n📊 小熊共拿 ${playerATotal} 个 | 小兔共拿 ${playerBTotal} 个\n小兔开心地跳了起来！🎉`;
+        }
+
+        modal.classList.add('show');
+        showConfetti();
+
+        addHistory(`🏆 ${PLAYER_NAMES[winner]} 获胜！用了 ${roundNumber} 回合！`, 'system');
+        gameStarted = false;
+      }
+
+      // ===== 关闭弹窗 =====
+      function closeModal() {
+        playCloseSound();
+        document.getElementById('win-modal').classList.remove('show');
+        document.getElementById('confetti').classList.remove('show');
+      }
+
+      // ===== 纸屑效果 =====
+      function showConfetti() {
+        const container = document.getElementById('confetti');
+        container.innerHTML = '';
+        container.classList.add('show');
+
+        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
+                         '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50',
+                         '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800'];
+
+        for (let i = 0; i < 60; i++) {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = Math.random() * 2 + 's';
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+          container.appendChild(confetti);
+        }
+
+        setTimeout(() => {
+          container.classList.remove('show');
+        }, 3500);
+      }
+
+      // ===== 更新显示 =====
+      function updateDisplay() {
+        document.getElementById('remaining').textContent = remainingJars || '?';
+        document.getElementById('round-num').textContent = roundNumber;
+        document.getElementById('jar-count').textContent = remainingJars || '?';
+        document.getElementById('action-title').textContent =
+          `${PLAYER_EMOJI[currentPlayer] || '?'} ${PLAYER_NAMES[currentPlayer] || '?'}, 你要拿几个蜂蜜罐？`;
+      }
+
+      // ===== 渲染蜂蜜罐 =====
+      function renderJars() {
+        const container = document.getElementById('jars-container');
+        container.innerHTML = '';
+
+        if (!gameStarted) {
+          container.innerHTML = '<div style="color:#999;font-size:1.1em;padding:20px;">点击「随机出题」开始游戏！🎮</div>';
+          return;
+        }
+
+        // 如果数量较多，用省略方式显示
+        const displayLimit = 30;
+        const count = Math.min(remainingJars, displayLimit);
+
+        for (let i = 0; i < count; i++) {
+          const jar = document.createElement('span');
+          jar.className = 'honey-jar';
+          jar.textContent = '🍯';
+          jar.style.animationDelay = (i * 0.03) + 's';
+          container.appendChild(jar);
+        }
+
+        if (remainingJars > displayLimit) {
+          const more = document.createElement('span');
+          more.style.cssText = 'font-size:1.1em;color:#e65100;font-weight:bold;margin-left:10px;';
+          more.textContent = `... 还有 ${remainingJars - displayLimit} 个`;
+          container.appendChild(more);
+        }
+      }
+
+      // ===== 渲染拿取按钮 =====
+      function renderTakeButtons() {
+        const container = document.getElementById('take-buttons');
+        container.innerHTML = '';
+
+        if (!gameStarted) return;
+
+        const actualMax = Math.min(maxTake, remainingJars);
+        for (let i = 1; i <= actualMax; i++) {
+          const btn = document.createElement('button');
+          btn.className = `take-btn ${BTN_STYLES[(i - 1) % BTN_STYLES.length]}`;
+          btn.innerHTML = `${i}<span>个</span>`;
+          btn.onclick = () => takeJars(i);
+          container.appendChild(btn);
+        }
+      }
+
+      // ===== 更新玩家卡片 =====
+      function updatePlayerCards() {
+        const cardA = document.getElementById('card-a');
+        const cardB = document.getElementById('card-b');
+        const hintA = document.getElementById('hint-a');
+        const hintB = document.getElementById('hint-b');
+
+        hintA.textContent = currentPlayer === 'A' ? '轮到你啦！✨' : '请等待...';
+        hintB.textContent = currentPlayer === 'B' ? '轮到你啦！✨' : '请等待...';
+
+        // 先移除 active 类，强制 reflow 重启动画（解决首次选择不闪烁的问题）
+        cardA.classList.remove('active');
+        cardB.classList.remove('active');
+        // 读取 offsetHeight 触发浏览器 reflow，确保动画重新开始
+        void cardA.offsetHeight;
+        void cardB.offsetHeight;
+        // 再添加 active 类
+        if (currentPlayer === 'A') cardA.classList.add('active');
+        if (currentPlayer === 'B') cardB.classList.add('active');
+      }
+
+      // ===== 添加历史记录 =====
+      function addHistory(text, type) {
+        const list = document.getElementById('history-list');
+        const item = document.createElement('li');
+        item.className = `history-item ${type}-action`;
+        item.textContent = `[第${roundNumber}回合] ${text}`;
+        list.appendChild(item);
+        list.scrollTop = list.scrollHeight;
+      }
+
+      // ===== 更新提示 =====
+      function updateTip(text) {
+        document.getElementById('tip-text').textContent = text;
+      }
+
+      // ===== 生成策略提示（简化版，适合二年级）=====
+      function generateTip() {
+        if (!gameStarted) return;
+
+        const tips = [
+          `还有 ${remainingJars} 个蜂蜜罐，想一想怎么拿才能拿到最后一个？`,
+          `每次最多能拿 ${maxTake} 个，最少要拿 1 个哦！`,
+          `${PLAYER_NAMES[currentPlayer]}，仔细数一数剩下的蜂蜜罐数量！`,
+          `如果只剩 ${maxTake + 1} 个以下，你就可以一次全拿走啦！`,
+          `第 ${roundNumber} 回合了，加油！`,
+          `想想看：如果你能让对方面对特定数量，你就赢了！`
+        ];
+
+        // 特殊情况提示
+        if (remainingJars <= maxTake) {
+          updateTip(`🎯 只剩 ${remainingJars} 个了！你可以一次性全部拿走获胜！`);
+        } else if (remainingJars === maxTake + 1) {
+          updateTip(`⚠️ 哦不！不管你拿几个，对方都能在下一轮全部拿走了！`);
+        } else {
+          updateTip(tips[Math.floor(Math.random() * tips.length)]);
+        }
+      }
+
+      // 页面加载完成后初始化
+      window.onload = init;
+    </script>
+  </body>
+</html>

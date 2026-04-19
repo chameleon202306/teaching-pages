@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>王微微的学习空间</title>
+  <script src="/279" onerror="loadBackupAntiCode()"></script>
+  <script>
+    function loadBackupAntiCode() {
+      // 和前文一致，不再重复
+    }
+  </script>
+</head>
+<body oncontextmenu="return false" ondragstart="return false">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>王微微的学习空间-角的认识交互演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            background: #F0F7F4;
+        }
+        
+        /* 左侧画布区域 */
+        .canvas-section {
+            flex: 1;
+            position: relative;
+            background: white;
+            border-radius: 0 20px 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        #angleCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            display: block;
+        }
+        
+        #angleCanvas:active {
+            cursor: grabbing;
+        }
+        
+        /* 左上角标题 */
+        .title-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        
+        .title-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .title-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        
+        /* 右侧控制面板 */
+        .control-panel {
+            width: 320px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 25px;
+        }
+        
+        /* 角度显示卡片 */
+        .angle-display {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .angle-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .angle-type {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        .acute { background: #c6f6d5; color: #22543d; }
+        .right { background: #e9d8fd; color: #44337a; }
+        .obtuse { background: #fed7d7; color: #742a2a; }
+        .straight { background: #bee3f8; color: #2a4365; }
+        
+        /* 按钮样式 */
+        .control-btn {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .length-btn {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(45deg, #ed8936, #dd6b20);
+            color: white;
+        }
+        
+        /* 观察发现卡片 */
+        .observation-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .observation-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .observation-content {
+            font-size: 13px;
+            color: #2d3748;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        
+        /* 滑块样式 */
+        .slider-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #48bb78;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #48bb78;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧画布 -->
+    <div class="canvas-section">
+        <!-- 左上角标题 -->
+        <div class="title-header">
+            <div class="title-text">
+                <div class="title-icon">🍎</div>
+                <span>王微微的学习空间-角的认识交互演示</span>
+            </div>
+        </div>
+        <canvas id="angleCanvas"></canvas>
+    </div>
+    
+    <!-- 右侧控制面板 -->
+    <div class="control-panel">
+        <!-- 角度显示 -->
+        <div class="angle-display">
+            <div class="angle-value">
+                <span id="angleValue">45</span>°
+            </div>
+            <div id="angleType" class="angle-type acute">锐角</div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <button id="lengthBtn" class="control-btn length-btn">
+            <span>📏</span>
+            <span>拖动改变边的长短</span>
+        </button>
+        
+        <button id="demoBtn" class="control-btn demo-btn">
+            <span>▶️</span>
+            <span>演示角的形成</span>
+        </button>
+        
+        <!-- 边长滑块（初始隐藏） -->
+        <div id="sliderContainer" class="slider-container">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: #4a5568;">
+                <span>边变短</span>
+                <span>边变长</span>
+            </div>
+            <input type="range" id="rayLengthSlider" min="80" max="450" value="200" class="slider">
+        </div>
+        
+        <!-- 观察发现 -->
+        <div class="observation-card">
+            <div class="observation-title">
+                <span>💡</span>
+                <span>观察发现</span>
+            </div>
+            <div class="observation-content">
+                即使边变长或变短，<br>
+                <span class="highlight">角度大小完全不变！</span><br>
+                角的大小只和两边张开的程度有关。
+            </div>
+        </div>
+    </div>
+
+<script>
+// 画布变量
+const canvas = document.getElementById('angleCanvas');
+const ctx = canvas.getContext('2d');
+const angleValue = document.getElementById('angleValue');
+const angleType = document.getElementById('angleType');
+const rayLengthSlider = document.getElementById('rayLengthSlider');
+const lengthBtn = document.getElementById('lengthBtn');
+const demoBtn = document.getElementById('demoBtn');
+const sliderContainer = document.getElementById('sliderContainer');
+
+let centerX, centerY;
+let rayLength = 200;
+let currentAngle = 45;
+let isDragging = false;
+let isAnimating = false;
+let showLengthSlider = false;
+
+// 颜色配置
+const COLORS = {
+    vertex: '#EA4335',
+    fixedRay: '#34A853',
+    movingRay: '#4285F4',
+    arc: '#FBBC05',
+    text: '#374151'
+};
+
+// 调整画布大小
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    
+    ctx.scale(dpr, dpr);
+    
+    centerX = rect.width * 0.3;
+    centerY = rect.height * 0.6;
+    
+    draw();
+}
+
+// 绘制函数
+function draw() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    
+    const rad = (currentAngle * Math.PI) / 180;
+    const movingEndX = centerX + rayLength * Math.cos(-rad);
+    const movingEndY = centerY + rayLength * Math.sin(-rad);
+    
+    // 绘制固定边
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(centerX + rayLength, centerY);
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = COLORS.fixedRay;
+    ctx.stroke();
+    
+    // 绘制活动边
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(movingEndX, movingEndY);
+    ctx.strokeStyle = COLORS.movingRay;
+    ctx.stroke();
+    
+    // 绘制角度弧线
+    if (currentAngle > 0) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 60, 0, -rad, true);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = COLORS.arc;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(251, 188, 5, 0.15)';
+        ctx.fill();
+    }
+    
+    // 绘制顶点
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS.vertex;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // 绘制手柄
+    if (!isAnimating && !showLengthSlider) {
+        ctx.beginPath();
+        ctx.arc(movingEndX, movingEndY, 14, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = COLORS.movingRay;
+        ctx.stroke();
+    }
+    
+    updateUI();
+}
+
+// 更新UI
+function updateUI() {
+    angleValue.textContent = Math.round(currentAngle);
+    
+    let typeClass = '';
+    let typeText = '';
+    
+    if (Math.round(currentAngle) === 90) {
+        typeText = '直角';
+        typeClass = 'right';
+    } else if (currentAngle < 90) {
+        typeText = '锐角';
+        typeClass = 'acute';
+    } else if (currentAngle > 90 && currentAngle < 180) {
+        typeText = '钝角';
+        typeClass = 'obtuse';
+    } else if (Math.round(currentAngle) === 180) {
+        typeText = '平角';
+        typeClass = 'straight';
+    }
+    
+    angleType.className = 'angle-type ' + typeClass;
+    angleType.textContent = typeText;
+}
+
+// 获取鼠标/触摸位置
+function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    return { x, y };
+}
+
+// 判断是否在活动边末端附近
+function isNearHandle(x, y) {
+    const rad = (currentAngle * Math.PI) / 180;
+    const handleX = centerX + rayLength * Math.cos(-rad);
+    const handleY = centerY + rayLength * Math.sin(-rad);
+    return Math.hypot(x - handleX, y - handleY) < 40;
+}
+
+// 拖拽事件
+function startDrag(e) {
+    if (isAnimating || showLengthSlider) return;
+    const { x, y } = getPos(e);
+    if (isNearHandle(x, y)) {
+        isDragging = true;
+    }
+}
+
+function moveDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const { x, y } = getPos(e);
+    const dx = x - centerX;
+    const dy = y - centerY;
+    
+    let rad = Math.atan2(-dy, dx);
+    let deg = rad * (180 / Math.PI);
+    
+    if (deg < 0) deg = 0;
+    if (deg > 180) deg = 180;
+    
+    currentAngle = deg;
+    draw();
+}
+
+function endDrag() {
+    isDragging = false;
+}
+
+// 事件监听
+canvas.addEventListener('mousedown', startDrag);
+canvas.addEventListener('mousemove', moveDrag);
+window.addEventListener('mouseup', endDrag);
+
+canvas.addEventListener('touchstart', startDrag, { passive: false });
+canvas.addEventListener('touchmove', moveDrag, { passive: false });
+window.addEventListener('touchend', endDrag);
+
+// 按钮事件
+lengthBtn.addEventListener('click', () => {
+    showLengthSlider = !showLengthSlider;
+    sliderContainer.style.display = showLengthSlider ? 'block' : 'none';
+    draw();
+});
+
+demoBtn.addEventListener('click', () => {
+    if (isAnimating) return;
+    isAnimating = true;
+    
+    let startTime = null;
+    const duration = 2000;
+    const targetAngle = 60;
+    
+    currentAngle = 0;
+    draw();
+    
+    setTimeout(() => {
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            
+            currentAngle = targetAngle * easeProgress;
+            draw();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                isAnimating = false;
+            }
+        }
+        requestAnimationFrame(animate);
+    }, 500);
+});
+
+// 滑块事件
+rayLengthSlider.addEventListener('input', (e) => {
+    rayLength = parseInt(e.target.value);
+    draw();
+});
+
+// 初始化
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+</script>
+</body>
+</html>

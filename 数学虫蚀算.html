@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♀️ 汉字竖式破译局 (挑战版)</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'MaokenZhuyin', 'KaiTi', sans-serif;
+            background-color: #f4f1de;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #3d405b;
+        }
+        h1 {
+            color: #e07a5f;
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        .rule-text {
+            color: #81b29a;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .game-container {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            z-index: 10;
+            position: relative;
+            max-width: 90vw;
+        }
+        /* 竖式排版 */
+        .vertical-math {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 3rem;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #3d405b;
+            padding: 20px 30px;
+            background: #fdfaf6;
+            border-radius: 15px;
+            border: 3px dashed #81b29a;
+        }
+        .math-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+        .char-block {
+            width: 55px;
+            text-align: center;
+            display: inline-block;
+            transition: color 0.3s;
+        }
+        .char-block.is-digit {
+            color: #e07a5f;
+        }
+        .operator {
+            margin-right: 25px;
+            color: #3d405b;
+        }
+        .math-line {
+            width: 100%;
+            height: 5px;
+            background-color: #3d405b;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        /* 密码本区域 */
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f2cc8f;
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .key-pair {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3d405b;
+        }
+        .digit-input {
+            width: 45px;
+            height: 45px;
+            font-size: 1.8rem;
+            text-align: center;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s;
+            color: #e07a5f;
+            background: rgba(255,255,255,0.9);
+        }
+        .digit-input:focus {
+            border-color: #81b29a;
+            box-shadow: 0 0 8px rgba(129, 178, 154, 0.6);
+        }
+        
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #e07a5f;
+            box-shadow: 0 5px 15px rgba(224, 122, 95, 0.4);
+        }
+        .btn-primary:hover { background-color: #d16b50; }
+        
+        .btn-secondary {
+            background-color: #81b29a;
+            box-shadow: 0 5px 15px rgba(129, 178, 154, 0.4);
+        }
+        .btn-secondary:hover { background-color: #6b9e84; }
+        
+        .btn:active { transform: translateY(2px); }
+        
+        #message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 30px;
+            text-align: center;
+        }
+        .level-text {
+            font-size: 1.3rem;
+            color: #3d405b;
+            font-weight: bold;
+            background: #f2cc8f;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: -10px;
+        }
+        canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti"></canvas>
+    
+    <h1>🚀 竖式密码挑战</h1>
+    <div class="rule-text">同字同数，异字异数，一起来破译吧！</div>
+
+    <div class="game-container">
+        <div class="level-text" id="level-indicator">第 1 关</div>
+        
+        <div class="vertical-math" id="vertical-math-board"></div>
+
+        <div class="control-panel" id="control-panel"></div>
+
+        <div class="button-group" id="btn-group">
+            <button class="btn btn-secondary" id="hint-btn" onclick="showAnswer()">偷看答案 👀</button>
+            <button class="btn btn-primary" id="action-btn" onclick="checkAnswer()">验证密码 🔓</button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // 音频上下文 (浏览器原生合成器)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSuccessSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'sine'; // 圆润的声音
+            // 播放一个欢快的琶音 (C5 -> E5 -> G5 -> C6)
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); 
+            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playErrorSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'triangle'; // 稍微低沉的声音
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // 精心设计的题库，包含预设答案
+        const levels = [
+            // 第1关：2位数 + 1位数 (进位) -> 89 + 8 = 97
+            { 
+                terms: ["快乐", "快"], operator: "+", result: "乐极",
+                solution: {"快": "8", "乐": "9", "极": "7"}
+            },
+            // 第2关：2位数 - 1位数 (退位) -> 52 - 8 = 44
+            { 
+                terms: ["西瓜", "甜"], operator: "-", result: "汁汁",
+                solution: {"西": "5", "瓜": "2", "甜": "8", "汁": "4"}
+            },
+            // 第3关：2位数 + 2位数 (进位) -> 45 + 45 = 90
+            { 
+                terms: ["小猫", "小猫"], operator: "+", result: "大狗",
+                solution: {"小": "4", "猫": "5", "大": "9", "狗": "0"}
+            },
+            // 第4关：3位数 + 2位数 (连续进位) -> 198 + 24 = 222
+            { 
+                terms: ["百花齐", "放春"], operator: "+", result: "放放放",
+                solution: {"百": "1", "花": "9", "齐": "8", "放": "2", "春": "4"}
+            },
+            // 第5关：3位数 - 2位数 (跨位退位挑战) -> 405 - 26 = 379
+            { 
+                terms: ["大飞船", "太空"], operator: "-", result: "真好玩",
+                solution: {"大": "4", "飞": "0", "船": "5", "太": "2", "空": "6", "真": "3", "好": "7", "玩": "9"}
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let currentUniqueChars = [];
+        let currentMap = {}; 
+
+        function initLevel() {
+            const level = levels[currentLevelIndex];
+            document.getElementById('level-indicator').innerText = `第 ${currentLevelIndex + 1} 关 / 共 ${levels.length} 关`;
+            document.getElementById('message').innerText = '';
+            
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.innerText = '验证密码 🔓';
+            actionBtn.onclick = checkAnswer;
+            
+            document.getElementById('hint-btn').style.display = 'inline-block';
+            
+            const allChars = level.terms.join('') + level.result;
+            currentUniqueChars = [...new Set(allChars.split(''))];
+            currentMap = {};
+            currentUniqueChars.forEach(c => currentMap[c] = '');
+
+            renderBoard();
+            renderControls();
+        }
+
+        function renderBoard() {
+            const level = levels[currentLevelIndex];
+            const board = document.getElementById('vertical-math-board');
+            board.innerHTML = '';
+
+            board.appendChild(createRow(level.terms[0], false));
+            board.appendChild(createRow(level.terms[1], level.operator));
+            
+            const line = document.createElement('div');
+            line.className = 'math-line';
+            board.appendChild(line);
+            
+            board.appendChild(createRow(level.result, false));
+        }
+
+        function createRow(text, operatorStr) {
+            const row = document.createElement('div');
+            row.className = 'math-row';
+            
+            if (operatorStr) {
+                const opSpan = document.createElement('span');
+                opSpan.className = 'operator';
+                opSpan.innerText = operatorStr;
+                row.appendChild(opSpan);
+            }
+
+            text.split('').forEach(char => {
+                const span = document.createElement('span');
+                span.className = 'char-block';
+                if (currentMap[char] !== '') {
+                    span.innerText = currentMap[char];
+                    span.classList.add('is-digit');
+                } else {
+                    span.innerText = char;
+                    span.classList.remove('is-digit');
+                }
+                row.appendChild(span);
+            });
+            return row;
+        }
+
+        function renderControls() {
+            const panel = document.getElementById('control-panel');
+            panel.innerHTML = '';
+
+            currentUniqueChars.forEach(char => {
+                const pair = document.createElement('div');
+                pair.className = 'key-pair';
+                
+                const label = document.createElement('span');
+                label.innerText = char + '=';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.className = 'digit-input';
+                input.value = currentMap[char];
+                input.id = `input-${char}`;
+                
+                input.oninput = function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    currentMap[char] = this.value;
+                    renderBoard(); 
+                };
+
+                pair.appendChild(label);
+                pair.appendChild(input);
+                panel.appendChild(pair);
+            });
+        }
+
+        function getNumberValue(str) {
+            let numStr = '';
+            for (let char of str) numStr += currentMap[char];
+            if (numStr.length > 1 && numStr.startsWith('0')) return NaN; 
+            return parseInt(numStr, 10);
+        }
+
+        // 新增功能：查看答案
+        function showAnswer() {
+            const level = levels[currentLevelIndex];
+            const solution = level.solution;
+            
+            // 填充映射并更新输入框
+            currentUniqueChars.forEach(char => {
+                currentMap[char] = solution[char];
+                const input = document.getElementById(`input-${char}`);
+                if(input) {
+                    input.value = solution[char];
+                    // 添加一个短暂的闪烁效果提示这是答案
+                    input.style.backgroundColor = '#f4f1de';
+                    setTimeout(() => input.style.backgroundColor = 'rgba(255,255,255,0.9)', 300);
+                }
+            });
+            
+            renderBoard();
+            document.getElementById('message').innerText = '💡 这是一组正确答案，你可以看看是怎么算出来的。';
+            document.getElementById('message').style.color = '#81b29a';
+        }
+
+        function checkAnswer() {
+            // 需要用户交互后才能播放音频，放在点击事件里初始化最为稳妥
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const msgDiv = document.getElementById('message');
+            
+            for (let char of currentUniqueChars) {
+                if (currentMap[char] === '') {
+                    msgDiv.innerText = '⚠️ 密码本还没填满哦！';
+                    msgDiv.style.color = '#e07a5f';
+                    return;
+                }
+            }
+
+            const usedNumbers = new Set(Object.values(currentMap));
+            if (usedNumbers.size !== currentUniqueChars.length) {
+                playErrorSound();
+                msgDiv.innerText = '🤔 不同的汉字必须代表不同的数字哦！';
+                msgDiv.style.color = '#e07a5f';
+                return;
+            }
+
+            const level = levels[currentLevelIndex];
+            const num1 = getNumberValue(level.terms[0]);
+            const num2 = getNumberValue(level.terms[1]);
+            const result = getNumberValue(level.result);
+
+            if (isNaN(num1) || isNaN(num2) || isNaN(result)) {
+                playErrorSound();
+                msgDiv.innerText = '📏 数字的首位不能是 0 哦！';
+                msgDiv.style.color = '#e07a5f';
+                return;
+            }
+
+            let isCorrect = false;
+            if (level.operator === '+') isCorrect = (num1 + num2 === result);
+            else if (level.operator === '-') isCorrect = (num1 - num2 === result);
+
+            if (isCorrect) {
+                playSuccessSound();
+                msgDiv.innerText = '🎉 破译成功！太聪明了！';
+                msgDiv.style.color = '#81b29a';
+                fireConfetti();
+                
+                document.getElementById('hint-btn').style.display = 'none';
+                
+                if (currentLevelIndex < levels.length - 1) {
+                    const btn = document.getElementById('action-btn');
+                    btn.innerText = '挑战下一关 ➡️';
+                    btn.onclick = () => {
+                        currentLevelIndex++;
+                        initLevel();
+                    };
+                } else {
+                    msgDiv.innerText = '🏆 恭喜你通关了！你是最强密码大师！';
+                    document.getElementById('action-btn').style.display = 'none';
+                }
+            } else {
+                playErrorSound();
+                msgDiv.innerText = '❌ 算式不成立，再仔细算算看？';
+                msgDiv.style.color = '#e07a5f';
+            }
+        }
+
+        // 撒花动画
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const particles = [];
+            const colors = ['#e07a5f', '#81b29a', '#f2cc8f', '#3d405b'];
+
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: canvas.width / 2, y: canvas.height / 2,
+                    r: Math.random() * 8 + 4,
+                    dx: Math.random() * 15 - 7.5,
+                    dy: Math.random() * -15 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach((p, index) => {
+                    p.dy += 0.4; p.x += p.dx; p.y += p.dy;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color; ctx.fill();
+                    if (p.y > canvas.height) particles.splice(index, 1);
+                });
+            }
+            animate();
+        }
+
+        window.onload = initLevel;
+    </script>
+</body>
+</html>
